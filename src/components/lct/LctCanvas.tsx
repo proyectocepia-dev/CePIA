@@ -77,9 +77,15 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
       }
       if ((o as THREE.Mesh).isMesh) {
         const m = o as THREE.Mesh;
-        const original = Array.isArray(m.material) ? m.material[0] : m.material;
+        const original = (Array.isArray(m.material) ? m.material[0] : m.material) as THREE.MeshStandardMaterial;
         m.userData.materialOriginal ??= original?.name ?? '';
-        m.material = m.userData.materialOriginal === 'Material.002' ? materiales.plato : materiales.estructura;
+        if (original?.map) {
+          // GLB con texturas horneadas (pintura gastada, suciedad, oclusión): se usa tal cual, por ambas caras.
+          original.side = THREE.DoubleSide;
+          original.envMapIntensity = LCT_ESCENA.luz.reflejoTexturas;
+        } else {
+          m.material = m.userData.materialOriginal === 'Material.002' ? materiales.plato : materiales.estructura;
+        }
       }
     });
     alListo();

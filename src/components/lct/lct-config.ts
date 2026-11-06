@@ -26,7 +26,8 @@ type Escena = {
   anillo: { centro: [number, number, number]; radio: number; atras: number; capas: Array<{ ancho: number; opacidad: number; color: string }> };
   /** azCero: lectura de brújula cuando la pose az es 0 (solo para la ficha; el modelo no tiene norte real). */
   lectura: { azCero: number };
-  luz: { hemisferio: number; clave: number; borde: number; bordeCalido: number; entorno: number };
+  /** reflejoTexturas: intensidad de reflejos del estudio sobre los materiales con texturas horneadas. */
+  luz: { hemisferio: number; clave: number; borde: number; bordeCalido: number; entorno: number; reflejoTexturas: number };
   inicio: PoseEscena;
   reposo: PoseEscena;
   salida: PoseEscena;
@@ -44,7 +45,7 @@ export const LCT_ESCENA: Escena = {
     ],
   },
   lectura: { azCero: 270 },
-  luz: { hemisferio: 0.35, clave: 1.4, borde: 5.5, bordeCalido: 2.2, entorno: 0.45 },
+  luz: { hemisferio: 0.35, clave: 1.4, borde: 5.5, bordeCalido: 2.2, entorno: 0.45, reflejoTexturas: 1 },
   inicio: { az: -130, el: 0, dist: 64, alto: 14, orbita: 18 },
   reposo: { az: -45, el: -42, dist: 40, alto: 6.5, orbita: 30 },
   salida: { az: 25, el: -70, dist: 42, alto: 3.5, orbita: 62 },
