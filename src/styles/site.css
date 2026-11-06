@@ -563,3 +563,27 @@ body { overscroll-behavior-y: none; }
 @media (prefers-reduced-motion: reduce) {
   .coverflow__item, .coverflow__card::after, .coverflow__body :is(p, .coverflow__go, .c-meta), .acordeon__panel, .acordeon__body { transition: none; }
 }
+
+/* Coverflow en tono claro (portada · Proyectos destacados): tarjetas lunares, tinta petróleo */
+.coverflow--claro .coverflow__card { background: var(--color-lunar-50, #F2F4F5); color: var(--color-text-on-light); border-color: var(--color-border-on-light); justify-content: flex-start;
+  box-shadow: 0 1px 0 rgba(20,32,42,.04), 0 21px 34px -21px rgba(20,32,42,.28); }
+.coverflow--claro .coverflow__card.art-1, .coverflow--claro .coverflow__card.art-2, .coverflow--claro .coverflow__card.art-3 { background: var(--color-lunar-50, #F2F4F5); }
+.coverflow--claro .coverflow__card::before { content: attr(data-sigla); display: flex; align-items: flex-end; padding: var(--space-5); flex: 1 1 auto; min-height: 34%; order: 0;
+  font-family: var(--font-cond); font-size: clamp(3.4375rem, 2.6rem + 3vw, 5.5625rem); font-weight: 500; line-height: .9; color: rgba(0,103,157,.28);
+  background: linear-gradient(135deg, #D6E6EE 0%, #E6E9EB 55%, #F3E2D3 100%); border-bottom: 1px solid var(--color-hairline-on-light); }
+.coverflow--claro .coverflow__card img { position: relative; inset: auto; flex: 1 1 auto; min-height: 0; height: auto; order: 0; border-bottom: 1px solid var(--color-hairline-on-light); }
+.coverflow--claro .coverflow__card:has(img)::before { display: none; }
+.coverflow--claro .coverflow__body { order: 1; flex: none; padding-top: var(--space-5); }
+.coverflow--claro .coverflow__card::after { background: none; background-color: transparent; }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) .coverflow__card::after { background-color: rgba(230,233,235, calc(.25 + var(--ad) * .2)); }
+.coverflow--claro .coverflow__num { color: var(--color-ink-700, #43525D); background: rgba(242,244,245,.88); padding: 0 .35em; }
+.coverflow--claro .coverflow__body p, .coverflow--claro .coverflow__body .c-meta { color: var(--color-text-on-light-muted); }
+.coverflow--claro .coverflow__body h3 { font-size: var(--font-size-2xl); color: var(--color-text-on-light); }
+.coverflow--claro .coverflow__go { color: var(--color-accent-text-on-light); }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) :is(p, .coverflow__go) { opacity: 0; }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) .c-meta { opacity: 1; }
+.coverflow--claro .coverflow__arrow { color: var(--color-text-on-light); border-color: var(--color-border-on-light); }
+.coverflow--claro .coverflow__arrow:hover, .coverflow--claro .coverflow__arrow:focus-visible { color: var(--color-accent-text-on-light); border-color: var(--color-accent); }
+.coverflow--claro .coverflow__dots button::before { background: var(--color-border-on-light); }
+.coverflow--claro .coverflow__dots button[aria-current="true"]::before { background: var(--color-accent); }
+.coverflow--claro .coverflow__track { height: clamp(500px, 42vw, 580px); }

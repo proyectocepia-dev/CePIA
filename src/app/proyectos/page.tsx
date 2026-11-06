@@ -31,7 +31,7 @@ export default function Proyectos() {
               <span className="c-rule c-meta">Líneas de trabajo</span>
               <h2 id="lineas" className="t-h2">Categorías</h2>
             </div>
-            <CategoryCoverflow items={categorias().map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen, n: contar(c.id) }))} />
+            <CategoryCoverflow items={categorias().map((c) => ({ id: c.id, href: `/proyectos/${c.id}`, nombre: c.nombre, resumen: c.resumen, meta: `${contar(c.id)} ${contar(c.id) === 1 ? 'proyecto' : 'proyectos'}` }))} />
           </div>
         </section>
 
