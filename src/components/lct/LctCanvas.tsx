@@ -258,6 +258,7 @@ function Inspeccion({ movimiento }: { movimiento: boolean }) {
       activo = true; x0 = e.clientX; y0 = e.clientY;
       el.setPointerCapture(e.pointerId);
       el.dataset.arrastrando = 'si';
+      el.closest('.lct-stage')?.setAttribute('data-girado', '');
     };
     const mover = (e: PointerEvent) => {
       if (!activo) return;

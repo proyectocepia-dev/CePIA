@@ -65,6 +65,12 @@ export default function HeroLct() {
       <span className="lct-stage__marca lct-stage__marca--b" aria-hidden="true" />
       <p className="lct-stage__fig" aria-hidden="true">Fig. 01 — LCT</p>
       <p className="lct-stage__carga" aria-hidden="true">Cargando modelo</p>
+      {movimiento && (
+        <p className="lct-stage__girar" aria-hidden="true">
+          <svg viewBox="0 0 32 20" width="32" height="20"><ellipse cx="16" cy="10" rx="13" ry="5.5" fill="none" stroke="currentColor" strokeWidth="1.2" strokeDasharray="56 8" /><path d="M25.5 3.8 29 5l-2.3 2.9" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          <span className="solo-puntero">Arrastra para girar 360°</span><span className="solo-tactil">Desliza para girar 360°</span>
+        </p>
+      )}
       <figcaption className="lct-stage__ficha">
         <span className="lct-stage__nombre">Leighton Chajnantor Telescope</span>
         <dl>
