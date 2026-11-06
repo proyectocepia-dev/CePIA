@@ -27,7 +27,10 @@ type Escena = {
   /** azCero: lectura de brújula cuando la pose az es 0 (solo para la ficha; el modelo no tiene norte real). */
   lectura: { azCero: number };
   /** reflejoTexturas: intensidad de reflejos del estudio sobre los materiales con texturas horneadas. */
-  luz: { hemisferio: number; clave: number; borde: number; bordeCalido: number; entorno: number; reflejoTexturas: number };
+  luz: { hemisferio: number; clave: number; borde: number; bordeCalido: number; frente: number; entorno: number; reflejoTexturas: number };
+  /** Respuesta al puntero (o a la inclinación del teléfono): grados de giro del telescopio y de la cámara,
+   *  metros de alto de cámara e inercia (más alto = sigue más rápido). */
+  sensibilidad: { az: number; el: number; orbita: number; alto: number; inercia: number };
   inicio: PoseEscena;
   reposo: PoseEscena;
   salida: PoseEscena;
@@ -39,14 +42,15 @@ export const LCT_ESCENA: Escena = {
   anillo: {
     centro: [0, 7.8, 0], radio: 5.8, atras: 4.5,
     capas: [
-      { ancho: 0.28, opacidad: 0.2, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
-      { ancho: 0.11, opacidad: 0.45, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
-      { ancho: 0.045, opacidad: 0.55, color: LCT_COLORES.anillo }, // núcleo, suave pero legible
+      { ancho: 0.32, opacidad: 0.32, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
+      { ancho: 0.11, opacidad: 0.6, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
+      { ancho: 0.045, opacidad: 0.75, color: LCT_COLORES.anillo }, // núcleo, suave pero legible
     ],
   },
   lectura: { azCero: 270 },
-  luz: { hemisferio: 0.35, clave: 1.4, borde: 5.5, bordeCalido: 2.2, entorno: 0.45, reflejoTexturas: 1 },
+  luz: { hemisferio: 0.55, clave: 2.6, borde: 7.5, bordeCalido: 3.2, frente: 2.4, entorno: 0.7, reflejoTexturas: 1.25 },
+  sensibilidad: { az: 16, el: 7, orbita: 7, alto: 1.4, inercia: 3.2 },
   inicio: { az: -130, el: 0, dist: 64, alto: 14, orbita: 18 },
-  reposo: { az: -45, el: -42, dist: 40, alto: 6.5, orbita: 30 },
-  salida: { az: 25, el: -70, dist: 42, alto: 3.5, orbita: 62 },
+  reposo: { az: -20, el: -55, dist: 46, alto: 6.5, orbita: 30 },
+  salida: { az: 55, el: -75, dist: 42, alto: 3.5, orbita: 62 },
 };

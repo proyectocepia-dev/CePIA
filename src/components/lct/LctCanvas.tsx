@@ -38,6 +38,35 @@ function mezclar(pose: Pose, clave: Clave): number {
   return THREE.MathUtils.lerp(pose[clave], destino, pose.salida);
 }
 
+/**
+ * Puntero normalizado (-1..1) de toda la ventana. El lienzo no recibe eventos (pointer-events: none, el texto va
+ * encima), así que se escucha en window. En teléfonos se suma la inclinación del equipo (deviceorientation),
+ * donde el navegador la entrega sin pedir permiso.
+ */
+const puntero = new THREE.Vector2();
+
+function Puntero({ movimiento }: { movimiento: boolean }) {
+  useEffect(() => {
+    if (!movimiento) return;
+    const mover = (e: PointerEvent) => {
+      puntero.set((e.clientX / window.innerWidth) * 2 - 1, -((e.clientY / window.innerHeight) * 2 - 1));
+    };
+    const inclinar = (e: DeviceOrientationEvent) => {
+      if (e.gamma == null || e.beta == null) return;
+      // gamma: izquierda/derecha (±35° útiles); beta: adelante/atrás, centrado en ~45° (teléfono en la mano).
+      puntero.set(THREE.MathUtils.clamp(e.gamma / 35, -1, 1), THREE.MathUtils.clamp((45 - e.beta) / 35, -1, 1));
+    };
+    window.addEventListener('pointermove', mover, { passive: true });
+    window.addEventListener('deviceorientation', inclinar, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', mover);
+      window.removeEventListener('deviceorientation', inclinar);
+      puntero.set(0, 0);
+    };
+  }, [movimiento]);
+  return null;
+}
+
 /** Reflejos suaves para el metal: un estudio generado en la GPU (sin descargar HDR). */
 function Entorno() {
   const { gl, scene } = useThree();
@@ -60,6 +89,7 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
   const base = useRef({ az: new THREE.Quaternion(), el: new THREE.Quaternion() });
   const giro = useMemo(() => new THREE.Quaternion(), []);
   const ultimaLectura = useRef(-1);
+  const sigue = useRef(new THREE.Vector2());   // puntero suavizado: el telescopio lo sigue con inercia
 
   const materiales = useMemo(() => ({
     estructura: new THREE.MeshStandardMaterial({ color: LCT_COLORES.estructura, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide }),
@@ -93,12 +123,14 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
 
   useEffect(() => () => { materiales.estructura.dispose(); materiales.plato.dispose(); }, [materiales]);
 
-  useFrame(({ clock }) => {
+  useFrame(({ clock }, dt) => {
     const t = clock.elapsedTime;
+    const sens = LCT_ESCENA.sensibilidad;
+    sigue.current.lerp(puntero, Math.min(1, dt * sens.inercia));
     // El seguimiento se apaga a medida que avanza la salida por scroll (y no existe sin movimiento).
     const deriva = movimiento ? 1 - pose.salida : 0;
-    const az = mezclar(pose, 'az') + deg(5) * Math.sin(t * 0.07) * deriva;
-    const el = mezclar(pose, 'el') + deg(2) * Math.sin(t * 0.11 + 1) * deriva;
+    const az = mezclar(pose, 'az') + (deg(4) * Math.sin(t * 0.07) + deg(sens.az) * sigue.current.x) * deriva;
+    const el = mezclar(pose, 'el') + (deg(1.5) * Math.sin(t * 0.11 + 1) + deg(sens.el) * sigue.current.y) * deriva;
     if (alLeer && t - ultimaLectura.current >= LECTURA_CADA) {
       ultimaLectura.current = t;
       const azGrados = THREE.MathUtils.euclideanModulo(LCT_ESCENA.lectura.azCero - THREE.MathUtils.radToDeg(az), 360);
@@ -173,13 +205,14 @@ function Anillo({ pose }: { pose: Pose }) {
 }
 
 function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
-  const { camera, pointer } = useThree();
+  const { camera } = useThree();
   const mirar = useMemo(() => new THREE.Vector3(...LCT_ESCENA.objetivo), []);
   const suave = useRef(new THREE.Vector2());
   useFrame((_, dt) => {
-    if (movimiento) suave.current.lerp(pointer, Math.min(1, dt * 2.5));
-    const a = mezclar(pose, 'orbita') + suave.current.x * deg(4);
-    const h = mezclar(pose, 'alto') + suave.current.y * 0.5;
+    const sens = LCT_ESCENA.sensibilidad;
+    if (movimiento) suave.current.lerp(puntero, Math.min(1, dt * sens.inercia * 0.6));
+    const a = mezclar(pose, 'orbita') + suave.current.x * deg(sens.orbita);
+    const h = mezclar(pose, 'alto') + suave.current.y * sens.alto;
     const d = mezclar(pose, 'dist');
     camera.position.set(Math.sin(a) * d, h, Math.cos(a) * d);
     camera.lookAt(mirar);
@@ -229,6 +262,8 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
       <directionalLight position={[-12, 9, 14]} intensity={l.clave} color={LCT_COLORES.clave} />
       <directionalLight position={[14, 10, -16]} intensity={l.borde} color={LCT_COLORES.borde} />
       <directionalLight position={[-16, 4, -12]} intensity={l.bordeCalido} color={LCT_COLORES.bordeCalido} />
+      <spotLight position={[2, 14, 30]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
+      <Puntero movimiento={movimiento} />
       <Entorno />
       <Suspense fallback={null}>
         <Telescopio pose={pose} movimiento={movimiento} alListo={alListo} alLeer={alLeer} />
