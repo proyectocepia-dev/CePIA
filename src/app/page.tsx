@@ -3,19 +3,32 @@ import Header from '@/components/Header';
 import Logo from '@/components/Logo';
 import NewsCard from '@/components/NewsCard';
 import Graticule from '@/components/Graticule';
-import Reticle from '@/components/Reticle';
+import HeroLct from '@/components/lct/HeroLct';
+import HeroReveal from '@/components/HeroReveal';
 import Sky from '@/components/Sky';
-import { categorias, noticias } from '@/lib/content';
+import LineasAcordeon from '@/components/LineasAcordeon';
+import CategoryCoverflow, { type CoverflowItem } from '@/components/CategoryCoverflow';
+import { categorias, noticias, proyectos, rutaProyecto } from '@/lib/content';
+
+/** Orden del slider de destacados: el LCT queda al centro y GrTE a su derecha. */
+const DESTACADOS = ['eht-titans', 'radiometros', 'lct', 'grte', 'mmics'];
 
 export default function Inicio() {
   const cats = categorias();
   const ultimas = noticias().slice(0, 3);
+  const todos = proyectos();
+  const destacados: CoverflowItem[] = DESTACADOS.flatMap((id) => {
+    const p = todos.find((x) => x.id === id);
+    if (!p) return [];
+    return [{ id: p.id, href: id === 'grte' ? '/grte' : rutaProyecto(p), nombre: p.titulo, resumen: p.resumen, meta: p.sigla, imagen: p.imagen }];
+  });
   return (
     <>
       <header className="s-hero hero">
         <Sky variante="hero" estrellas={260} />
         <Graticule />
         <Header />
+        <HeroReveal />
         <div className="c-watermark" aria-hidden="true"><Logo variant="iso" /></div>
         <div className="u-container hero__inner">
           <div className="hero__copy">
@@ -28,7 +41,7 @@ export default function Inicio() {
             </div>
           </div>
           <div className="hero__stage">
-            <Reticle foto="/img/lct-radiotelescopio.jpg" />
+            <HeroLct />
           </div>
           <dl className="readout">
             <div><dt>Sede</dt><dd>Concepción <span>36°49′S 73°03′O</span></dd></div>
@@ -39,49 +52,23 @@ export default function Inicio() {
         </div>
       </header>
       <main id="contenido">
-        <section className="s-night home-featured" aria-labelledby="destacados">
-          <Sky variante="band" estrellas={140} semilla={23} />
-          <Graticule />
+        <section className="s-light home-featured" aria-labelledby="destacados">
           <div className="u-container">
             <div className="sec-head sec-head--row">
               <h2 id="destacados" className="t-h2">Proyectos destacados</h2>
-              <p className="muted">El traslado del LCT a Chajnantor y la red de radiotelescopios escolares.</p>
+              <p className="muted">El traslado del LCT a Chajnantor, la red de radiotelescopios escolares y otros proyectos del centro.</p>
             </div>
-            <div className="duo">
-              <Link className="feature-link" href="/proyectos/lct">
-                <img src="/img/lct-radiotelescopio.jpg" alt="" loading="lazy" />
-                <span className="c-chip c-chip--accent">Proyecto LCT</span>
-                <h3>Leighton Chajnantor Telescope</h3>
-                <p>Un radiotelescopio de 10,4 m viaja desde Hawái al llano de Chajnantor.</p>
-                <span className="c-btn--arrow">Conocer el LCT </span>
-              </Link>
-              <Link className="feature-link feature-link--grte u-hex" href="/grte">
-                <span className="c-chip">GrTE</span>
-                <h3>Radiotelescopio de bajo costo para colegios</h3>
-                <p>Estudiantes construyen su propio radiotelescopio, suben sus observaciones y las comparten con otras escuelas.</p>
-                <span className="c-btn--arrow">Ir a GrTE </span>
-              </Link>
-            </div>
+            <CategoryCoverflow tono="claro" etiqueta="Proyectos destacados" cta="Ver proyecto" items={destacados} />
           </div>
         </section>
 
-        <section className="s-light" aria-labelledby="lineas">
+        <section className="s-night s-night--deep" aria-labelledby="lineas">
           <div className="u-container">
             <div className="sec-head sec-head--row">
               <h2 id="lineas" className="t-h2">Líneas de trabajo</h2>
               <Link href="/proyectos">Todos los proyectos</Link>
             </div>
-            <ul className="index-list">
-              {cats.map((c) => (
-                <li key={c.id}>
-                  <Link href={`/proyectos/${c.id}`} prefetch={false}>
-                    <h3>{c.nombre}</h3>
-                    <p>{c.resumen}</p>
-                    <span className="index-list__go">Ver línea</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <LineasAcordeon items={cats.map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen }))} />
           </div>
         </section>
 

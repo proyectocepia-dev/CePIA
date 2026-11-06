@@ -480,3 +480,214 @@ body { overscroll-behavior-y: none; }
     .sky__nebula--a { animation: nebula-a-scroll linear both; animation-timeline: view(); }
   }
 }
+
+/* ===== v0.9 · Slider coverflow de líneas (/proyectos, T1.19) y acordeón de líneas (portada, T1.20) ===== */
+.u-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.coverflow { position: relative; display: grid; gap: var(--space-6); }
+.coverflow__track { position: relative; margin: 0; padding: 0; list-style: none; height: clamp(460px, 40vw, 540px);
+  perspective: 1600px; perspective-origin: 50% 45%; transform-style: preserve-3d; touch-action: pan-y; user-select: none; }
+.coverflow__item { --w: min(80vw, 420px); position: absolute; left: 50%; top: 0; width: var(--w); height: 100%; margin-left: calc(var(--w) / -2);
+  transform: translateX(calc(var(--d) * var(--w) * .62)) translateZ(calc(var(--ad) * -220px)) rotateY(calc(var(--d) * -32deg));
+  z-index: calc(10 - var(--ad));
+  transition: transform var(--motion-duration-slow) var(--motion-ease-out); }
+.coverflow__card { position: relative; display: flex; flex-direction: column; justify-content: flex-end; height: 100%; overflow: hidden;
+  color: var(--color-text-on-dark); text-decoration: none; border: 1px solid var(--line-strong); border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); }
+.coverflow__card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+/* velo inferior: garantiza contraste AA del texto sobre el color o la foto */
+.coverflow__card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(7,12,17,.12) 0%, rgba(7,12,17,.35) 40%, rgba(7,12,17,.92) 100%);
+  transition: background-color var(--motion-duration-slow) var(--motion-ease-out); }
+.coverflow__item:not([data-activo="true"]) .coverflow__card::after { background-color: rgba(7,12,17, calc(.3 + var(--ad) * .2)); }
+.coverflow__num { position: absolute; z-index: 1; top: var(--space-5); left: var(--space-5); font-family: var(--font-semi); font-size: var(--font-size-md); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--readout, #C2F1F0); }
+.coverflow__body { position: relative; z-index: 1; display: grid; gap: var(--space-3); padding: var(--space-6) var(--space-5) var(--space-5); }
+.coverflow__body h3 { font-family: var(--font-cond); font-size: var(--font-size-3xl); font-weight: 500; line-height: 1.02; overflow-wrap: anywhere; }
+.coverflow__body p { font-size: var(--font-size-md); line-height: 1.5; color: var(--color-text-on-dark); max-width: 34ch; }
+.coverflow__body .c-meta { color: var(--color-text-on-dark); }
+.coverflow__go { font-family: var(--font-semi); font-size: var(--font-size-md); font-weight: 500; color: var(--color-accent); }
+.coverflow__item:not([data-activo="true"]) :is(p, .coverflow__go, .c-meta) { opacity: 0; }
+.coverflow__body :is(p, .coverflow__go, .c-meta) { transition: opacity var(--motion-duration-base) var(--motion-ease-out); }
+.coverflow__item[data-activo="true"] .coverflow__card { border-top: 2px solid var(--color-accent); }
+.coverflow__item:not([data-activo="true"]) .coverflow__card { cursor: pointer; }
+.coverflow__card:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+
+.coverflow__controls { display: flex; align-items: center; justify-content: center; gap: var(--space-5); }
+.coverflow__arrow { display: grid; place-items: center; width: 48px; height: 48px; padding: 0; background: transparent; color: var(--color-text-on-dark);
+  border: 1px solid var(--line-strong); border-radius: 2px; cursor: pointer; transition: border-color var(--motion-duration-fast) var(--motion-ease-out), color var(--motion-duration-fast) var(--motion-ease-out); }
+.coverflow__arrow svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+.coverflow__arrow:hover, .coverflow__arrow:focus-visible { border-color: var(--color-accent); color: var(--color-accent); }
+.coverflow__dots { display: flex; align-items: center; gap: var(--space-2); }
+.coverflow__dots button { width: 24px; height: 32px; padding: 0; background: transparent; border: 0; cursor: pointer; position: relative; }
+.coverflow__dots button::before { content: ""; position: absolute; left: 50%; bottom: 10px; width: 2px; height: 10px; background: var(--line-strong); transform: translateX(-50%); transition: height var(--motion-duration-base) var(--motion-ease-out), background-color var(--motion-duration-base) var(--motion-ease-out); }
+.coverflow__dots button[aria-current="true"]::before { height: 20px; background: var(--color-accent); }
+.coverflow__dots button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+@media (max-width: 720px) {
+  .coverflow__track { height: 480px; perspective: 1000px; }
+  .coverflow__item:not([data-activo="true"]) h3 { opacity: 0; }
+  .coverflow__item { --w: min(82vw, 360px); transform: translateX(calc(var(--d) * var(--w) * .9)) translateZ(calc(var(--ad) * -160px)) rotateY(calc(var(--d) * -18deg)); }
+}
+.coverflow { overflow-x: clip; overflow-y: visible; padding-block: var(--space-3); }
+
+.acordeon { display: flex; gap: var(--space-3); margin: 0; padding: 0; list-style: none; height: clamp(440px, 54vh, 540px); }
+.acordeon__panel { position: relative; flex: 1 1 0; min-width: 76px; overflow: hidden; border: 1px solid var(--line-strong); border-radius: 2px;
+  background: linear-gradient(180deg, rgba(194,241,240,.06) 0%, rgba(7,12,17,0) 45%), linear-gradient(160deg, #13202B 0%, #0A1118 70%);
+  transition: flex-grow var(--motion-duration-slow) var(--motion-ease-out), border-color var(--motion-duration-base) var(--motion-ease-out); }
+.acordeon__panel[data-activo="true"] { flex-grow: 5; border-top: 2px solid var(--color-accent);
+  background: radial-gradient(120% 70% at 30% 110%, rgba(247,140,64,.22) 0%, transparent 60%), linear-gradient(160deg, #173248 0%, #0A1118 75%); }
+.acordeon__tab { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: var(--space-4);
+  padding: var(--space-5); background: transparent; border: 0; color: var(--color-text-on-dark); text-align: left; cursor: pointer; }
+.acordeon__tab:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -4px; }
+.acordeon__num { font-family: var(--font-semi); font-size: var(--font-size-md); font-weight: 500; color: var(--readout, #C2F1F0); font-variant-numeric: tabular-nums; }
+.acordeon h3 { font-family: var(--font-cond); font-size: var(--font-size-2xl); font-weight: 500; line-height: 1.05; white-space: nowrap; }
+.acordeon__panel:not([data-activo="true"]) h3 { writing-mode: vertical-rl; transform: rotate(180deg); font-size: clamp(1.5rem, 1.2rem + .6vw, 1.75rem); }
+.acordeon__panel[data-activo="true"] h3 { font-size: var(--font-size-3xl); white-space: normal; max-width: 14em; }
+.acordeon__panel[data-activo="true"] .acordeon__tab { justify-content: flex-start; }
+.acordeon__panel[data-activo="true"] .acordeon__tab h3 { margin-top: auto; padding-bottom: calc(var(--space-8) + var(--space-6)); }
+.acordeon__body { position: absolute; left: 0; right: 0; bottom: 0; display: grid; gap: var(--space-4); padding: 0 var(--space-5) var(--space-5);
+  min-width: 300px; opacity: 0; transform: translateY(8px); pointer-events: none;
+  transition: opacity var(--motion-duration-base) var(--motion-ease-out), transform var(--motion-duration-base) var(--motion-ease-out); }
+.acordeon__panel[data-activo="true"] .acordeon__body { opacity: 1; transform: none; pointer-events: auto; transition-delay: 180ms; }
+.acordeon__body p { font-size: var(--font-size-md); line-height: 1.55; color: var(--color-text-on-dark); max-width: 38ch; }
+.acordeon__go { font-family: var(--font-semi); font-size: var(--font-size-md); font-weight: 500; color: var(--color-accent); text-decoration: none; justify-self: start; }
+.acordeon__go:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+@media (max-width: 899px) {
+  .acordeon { flex-direction: column; height: auto; gap: 0; }
+  .acordeon__panel { flex: none; min-width: 0; min-height: 76px; border-radius: 0; border-width: 0 0 1px 0; }
+  .acordeon__panel[data-activo="true"] { border-top: 2px solid var(--color-accent); padding-bottom: var(--space-3); }
+  .acordeon__panel:not([data-activo="true"]) h3 { writing-mode: horizontal-tb; transform: none; }
+  .acordeon__tab { flex-direction: row; justify-content: flex-start; align-items: baseline; gap: var(--space-4); bottom: auto; position: relative; }
+  .acordeon__panel[data-activo="true"] .acordeon__tab h3 { padding-bottom: 0; margin-top: 0; white-space: normal; }
+  .acordeon__body { position: relative; min-width: 0; }
+  .acordeon__panel:not([data-activo="true"]) .acordeon__body { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coverflow__item, .coverflow__card::after, .coverflow__body :is(p, .coverflow__go, .c-meta), .acordeon__panel, .acordeon__body { transition: none; }
+}
+
+/* Coverflow en tono claro (portada · Proyectos destacados): tarjetas lunares, tinta petróleo */
+.coverflow--claro .coverflow__card { background: var(--color-lunar-50, #F2F4F5); color: var(--color-text-on-light); border-color: var(--color-border-on-light); justify-content: flex-start;
+  box-shadow: 0 1px 0 rgba(20,32,42,.04), 0 21px 34px -21px rgba(20,32,42,.28); }
+.coverflow--claro .coverflow__card.art-1, .coverflow--claro .coverflow__card.art-2, .coverflow--claro .coverflow__card.art-3 { background: var(--color-lunar-50, #F2F4F5); }
+.coverflow--claro .coverflow__card::before { content: attr(data-sigla); display: flex; align-items: flex-end; padding: var(--space-5); flex: 1 1 auto; min-height: 34%; order: 0;
+  font-family: var(--font-cond); font-size: clamp(3.4375rem, 2.6rem + 3vw, 5.5625rem); font-weight: 500; line-height: .9; color: rgba(0,103,157,.28);
+  background: linear-gradient(135deg, #D6E6EE 0%, #E6E9EB 55%, #F3E2D3 100%); border-bottom: 1px solid var(--color-hairline-on-light); }
+.coverflow--claro .coverflow__card img { position: relative; inset: auto; flex: 1 1 auto; min-height: 0; height: auto; order: 0; border-bottom: 1px solid var(--color-hairline-on-light); }
+.coverflow--claro .coverflow__card:has(img)::before { display: none; }
+.coverflow--claro .coverflow__body { order: 1; flex: none; padding-top: var(--space-5); }
+.coverflow--claro .coverflow__card::after { background: none; background-color: transparent; }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) .coverflow__card::after { background-color: rgba(230,233,235, calc(.25 + var(--ad) * .2)); }
+.coverflow--claro .coverflow__num { color: var(--color-ink-700, #43525D); background: rgba(242,244,245,.88); padding: 0 .35em; }
+.coverflow--claro .coverflow__body p, .coverflow--claro .coverflow__body .c-meta { color: var(--color-text-on-light-muted); }
+.coverflow--claro .coverflow__body h3 { font-size: var(--font-size-2xl); color: var(--color-text-on-light); }
+.coverflow--claro .coverflow__go { color: var(--color-accent-text-on-light); }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) :is(p, .coverflow__go) { opacity: 0; }
+.coverflow--claro .coverflow__item:not([data-activo="true"]) .c-meta { opacity: 1; }
+.coverflow--claro .coverflow__arrow { color: var(--color-text-on-light); border-color: var(--color-border-on-light); }
+.coverflow--claro .coverflow__arrow:hover, .coverflow--claro .coverflow__arrow:focus-visible { color: var(--color-accent-text-on-light); border-color: var(--color-accent); }
+.coverflow--claro .coverflow__dots button::before { background: var(--color-border-on-light); }
+.coverflow--claro .coverflow__dots button[aria-current="true"]::before { background: var(--color-accent); }
+.coverflow--claro .coverflow__track { height: clamp(500px, 42vw, 580px); }
+
+/* ---------- Capa inmersiva · LCT 3D en la portada ---------- */
+/* Lámina técnica, en clave brutalista: el telescopio en metal oscuro delante de un anillo de luz fuera de foco,
+   enmarcado con marcas de corte, rótulo de figura y una ficha de datos de bordes duros (sin radios ni sombras).
+   El lienzo desborda el escenario (el hero recorta) y queda por detrás del texto; el velo de .hero__copy::before
+   mantiene el contraste del título y los botones. */
+.hero__copy { z-index: 1; }
+.hero__stage { position: relative; z-index: 0; }
+.lct-stage { position: relative; margin: 0; aspect-ratio: 1; }
+.lct-stage__canvas { position: absolute; inset: -22% -26% -30% -26%; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--motion-ease-out); }
+@media (min-width: 960px) { .lct-stage__canvas { inset: -42% -58% -52% -46%; } }
+.lct-stage__canvas canvas { display: block; }
+.lct-stage[data-estado="listo"] .lct-stage__canvas { opacity: 1; }
+
+/* Marcas de corte en las esquinas del escenario: dos "L" de 1 px. */
+.lct-stage__marca { position: absolute; width: 28px; height: 28px; pointer-events: none; border-color: var(--line-strong); border-style: solid; border-width: 0; }
+.lct-stage__marca--a { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+.lct-stage__marca--b { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+
+/* Rótulo de figura y aviso de carga: versalitas técnicas, ≥15 px. */
+.lct-stage__fig, .lct-stage__carga { position: absolute; margin: 0; font-family: var(--font-semi); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-on-dark-muted); text-shadow: none; }
+.lct-stage__fig { top: 0; left: 40px; z-index: 1; transform: translateY(-50%); padding: 2px var(--space-2); background: rgba(6, 13, 20, .78); }
+.lct-stage__carga { top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--readout); transition: opacity .4s ease-out; }
+.lct-stage[data-estado="listo"] .lct-stage__carga, .lct-stage[data-estado="sin-3d"] .lct-stage__carga { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .lct-stage[data-estado="cargando"] .lct-stage__carga { animation: lct-parpadeo 1.2s steps(2, jump-none) infinite; }
+}
+@keyframes lct-parpadeo { 50% { opacity: .35; } }
+
+/* Ficha de datos: bloque duro, alineado al borde inferior derecho; azimut y elevación vienen de la escena. */
+.lct-stage__ficha { position: absolute; right: 0; bottom: 0; z-index: 1; display: grid; min-width: min(100%, 340px);
+  background: rgba(6, 13, 20, .78); border: 1px solid var(--line-strong); text-shadow: none; }
+.lct-stage__nombre { padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--line-strong);
+  font-family: var(--font-semi); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-on-dark); }
+.lct-stage__ficha dl { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.lct-stage__ficha dl > div { padding: var(--space-2) var(--space-4) var(--space-3); display: grid; gap: 2px; }
+.lct-stage__ficha dl > div + div { border-left: 1px solid var(--line); }
+.lct-stage__ficha dt { font-family: var(--font-semi); font-size: var(--font-size-sm); color: var(--color-text-on-dark-muted); }
+.lct-stage__ficha dd { margin: 0; font-family: var(--font-cond); font-size: var(--font-size-xl); font-weight: 500; line-height: 1.1; color: var(--color-text-on-dark); font-variant-numeric: tabular-nums; }
+.lct-stage__ficha dd span { color: var(--readout); }
+/* Móvil: la ficha baja del escenario para no tapar el modelo (el escenario conserva su alto con padding). */
+@media (max-width: 959px) { .lct-stage { aspect-ratio: auto; padding-top: 92%; } .lct-stage__ficha { position: relative; min-width: 0; } }
+
+/* Entrada del hero: el título se revela de abajo hacia arriba (máscara + desplazamiento) y le siguen bajada,
+   texto y botones en cascada; la ficha y el rótulo del LCT entran cuando el modelo está listo.
+   Solo transform, opacity y clip-path (regla v0.8). Sin movimiento: todo aparece de inmediato. */
+@media (prefers-reduced-motion: no-preference) {
+  .hero__copy h1 { animation: hero-revela 1.1s var(--motion-ease-out) .1s both; }
+  .hero__copy > :not(h1) { animation: hero-sube .8s var(--motion-ease-out) both; }
+  .hero__copy > :nth-child(2) { animation-delay: .45s; }
+  .hero__copy > :nth-child(3) { animation-delay: .6s; }
+  .hero__copy > :nth-child(4) { animation-delay: .75s; }
+  .lct-stage__ficha, .lct-stage__fig, .lct-stage__marca { opacity: 0; transition: opacity .7s var(--motion-ease-out), translate .7s var(--motion-ease-out); }
+  .lct-stage__ficha { translate: 0 12px; }
+  .lct-stage[data-estado="listo"] .lct-stage__ficha, .lct-stage[data-estado="listo"] .lct-stage__fig,
+  .lct-stage[data-estado="listo"] .lct-stage__marca { opacity: 1; translate: 0 0; transition-delay: 1.4s; }
+  .lct-stage[data-estado="sin-3d"] .lct-stage__ficha, .lct-stage[data-estado="sin-3d"] .lct-stage__fig,
+  .lct-stage[data-estado="sin-3d"] .lct-stage__marca { opacity: 1; translate: 0 0; }
+}
+@keyframes hero-revela { from { clip-path: inset(0 0 100% 0); transform: translateY(.35em); } to { clip-path: inset(0 0 -10% 0); transform: none; } }
+@keyframes hero-sube { from { opacity: 0; transform: translateY(18px); } }
+
+/* Móvil: el escenario del LCT ocupa todo el ancho y el modelo llena el cuadro; la ficha queda debajo. */
+@media (max-width: 959px) {
+  .hero__stage { width: 100%; }
+  .lct-stage { padding-top: 100%; }
+  .lct-stage__canvas { inset: -8% -18% -6% -18%; }
+  .lct-stage__fig { left: 32px; }
+  .lct-stage__ficha dl > div { padding: var(--space-2) var(--space-3) var(--space-3); }
+}
+
+/* Escritorio: el LCT ocupa todo el hero, como escena de fondo. El telescopio queda al centro-derecha (corrimiento
+   de cámara en lct-config) y el texto a la izquierda, sobre su velo. La ficha y el rótulo se alinean con el
+   borde del contenedor y quedan sobre la barra de lecturas. */
+@media (min-width: 960px) {
+  .hero > .c-header, .hero .c-header { position: relative; z-index: 2; }
+  .hero__stage { position: absolute; inset: 0; width: auto; justify-self: stretch; align-self: stretch; z-index: 0; pointer-events: none; --borde: max(var(--space-5), calc((100vw - var(--layout-container)) / 2)); }
+  .lct-stage { position: absolute; inset: 0; aspect-ratio: auto; padding: 0; }
+  .lct-stage__canvas { inset: 0; }
+  .lct-stage__ficha { right: var(--borde); bottom: calc(var(--space-9) + var(--space-7)); }
+  .lct-stage__fig { top: calc(var(--space-9) + var(--space-6)); left: auto; right: var(--borde); transform: none; }
+  .lct-stage__marca--a { top: calc(var(--space-9) + var(--space-5)); left: 50%; }
+  .lct-stage__marca--b { right: calc(var(--borde) - var(--space-3)); bottom: calc(var(--space-9) + var(--space-7) - var(--space-3)); }
+  .lct-stage__carga { left: 68%; }
+  .hero__inner { align-content: center; }
+}
+
+/* Portada compacta (T1.18): menú retraído en la primera vista (aparece al bajar o con foco de teclado) y título
+   con tope por alto de ventana para que los botones quepan sin scroll. */
+html[data-menu] .hero .c-nav { transition: opacity .24s var(--motion-ease-out), translate .24s var(--motion-ease-out); }
+html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; translate: 0 -6px; pointer-events: none; }
+.hero__copy h1 { font-size: min(clamp(3.4375rem, 1.6rem + 6.4vw, 6.875rem), 11.5svh); }
+@media (min-width: 960px) { .hero__inner { min-height: 100svh; padding-top: calc(var(--space-9) + var(--space-2)); } }
+/* Móvil: los bordes del lienzo se funden para que el suelo del llano no se vea como una caja. */
+@media (max-width: 959px) {
+  .lct-stage__canvas { -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent);
+                               mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent); }
+}
+
+/* Inspección: el lienzo del LCT recibe el arrastre (el texto y los botones siguen encima). En táctil el gesto
+   vertical sigue siendo scroll de la página. */
+.lct-stage__canvas { pointer-events: auto; touch-action: pan-y; cursor: grab; }
+.lct-stage__canvas canvas[data-arrastrando] { cursor: grabbing; }
+@media (min-width: 960px) { .hero__stage { pointer-events: none; } .lct-stage__canvas { pointer-events: auto; } }
