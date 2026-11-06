@@ -10,7 +10,8 @@ El visor de la portada (`src/components/lct/`) muestra el modelo 3D del Leighton
   2. *Seguimiento*: en reposo, deriva lenta en azimut y elevación (sigue una fuente); el puntero inclina un poco la cámara.
   3. *Salida*: al hacer scroll fuera del hero, el montaje gira, el plato baja al horizonte y la cámara se aleja.
 - El render se detiene cuando el visor sale de pantalla.
-- El modelo queda dentro del anillo del visor (máscara radial), a la derecha del texto; no tapa título, bajada ni botones.
+- Dirección visual: pieza de museo. Metal oscuro con luces de borde (aqua del visor detrás, naranja bajo del otro lado) y reflejos de un estudio generado en la GPU (`RoomEnvironment`, sin descargar HDR). Detrás, un anillo de luz que siempre mira a la cámara y que el plato tapa en parte, con halo aditivo; se enciende durante el apuntado.
+- El lienzo es más grande que el visor y queda por detrás del texto, a la derecha; el velo de `.hero__copy` mantiene el contraste de título, bajada y botones.
 
 ## Regenerar el GLB desde Blender
 Archivo fuente: `LCT Modelo Completo.blend` (carpeta del proyecto, no va al repo).

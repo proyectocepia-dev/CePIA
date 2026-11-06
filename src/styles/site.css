@@ -481,14 +481,16 @@ body { overscroll-behavior-y: none; }
   }
 }
 
-/* ---------- Capa inmersiva · LCT 3D en el visor de la portada ---------- */
-/* La foto queda debajo como respaldo; cuando el modelo carga, se desvanece y el 3D ocupa el visor.
-   La máscara funde el modelo con el anillo del visor (r = 232/600 ≈ 38,7 %). */
+/* ---------- Capa inmersiva · LCT 3D en la portada ---------- */
+/* Pieza de museo: el telescopio en metal oscuro delante de un anillo de luz, más grande que el visor y sin
+   máscara. El lienzo desborda el escenario (el hero recorta) y queda por detrás del texto; el velo de
+   .hero__copy::before mantiene el contraste del título y los botones. La foto del visor es el respaldo. */
+.hero__copy { z-index: 1; }
+.hero__stage { position: relative; z-index: 0; }
 .lct-stage { position: relative; }
-.lct-stage__canvas { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s var(--motion-ease-out);
-  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 39.5%);
-          mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 39.5%); }
+.lct-stage__canvas { position: absolute; inset: -22% -26% -30% -26%; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--motion-ease-out); }
+@media (min-width: 960px) { .lct-stage__canvas { inset: -42% -58% -52% -46%; } }
 .lct-stage__canvas canvas { display: block; }
-.lct-stage .reticle__img, .lct-stage .reticle svg g[clip-path] circle { transition: opacity 1.2s var(--motion-ease-out); }
+.lct-stage .reticle { transition: opacity 1.2s var(--motion-ease-out); }
 .lct-stage[data-estado="listo"] .lct-stage__canvas { opacity: 1; }
-.lct-stage[data-estado="listo"] .reticle__img { opacity: 0; }
+.lct-stage[data-estado="listo"] .reticle { opacity: 0; }
