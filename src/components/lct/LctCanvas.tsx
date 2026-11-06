@@ -14,10 +14,10 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LCT_COLORES, LCT_ESCENA, LCT_MODELO } from './lct-config';
+import Posproceso from './Posproceso';
 
 gsap.registerPlugin(ScrollTrigger);
 const deg = THREE.MathUtils.degToRad;
@@ -68,26 +68,6 @@ function Puntero({ movimiento }: { movimiento: boolean }) {
   return null;
 }
 
-/**
- * Paneles del plato en aluminio prístino. El GLB trae un solo material por pieza, pero los paneles se hornearon
- * en gris claro y la estructura en grafito: la luminancia del color base los separa. Donde es panel, el shader
- * baja la rugosidad, sube el metálico y limpia el color, así refleja el estudio como un plato pulido.
- */
-function pulirPaneles(shader: { fragmentShader: string; uniforms: Record<string, THREE.IUniform> }) {
-  const a = LCT_ESCENA.acabado;
-  shader.uniforms.uPanelUmbral = { value: new THREE.Vector2(a.umbral[0], a.umbral[1]) };
-  shader.uniforms.uPanelColor = { value: new THREE.Color(LCT_COLORES.panelPulido) };
-  shader.uniforms.uPanelRugosidad = { value: a.rugosidadPanel };
-  shader.fragmentShader = shader.fragmentShader
-    .replace('void main() {', 'uniform vec2 uPanelUmbral;\nuniform vec3 uPanelColor;\nuniform float uPanelRugosidad;\nvoid main() {')
-    .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
-      float lctLum = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-      float lctPanel = smoothstep(uPanelUmbral.x, uPanelUmbral.y, lctLum);
-      diffuseColor.rgb = mix(diffuseColor.rgb, uPanelColor, lctPanel * 0.75);
-      roughnessFactor = mix(roughnessFactor, uPanelRugosidad, lctPanel);
-      metalnessFactor = mix(metalnessFactor, 1.0, lctPanel);`);
-}
-
 /** Reflejos suaves para el metal: un estudio generado en la GPU (sin descargar HDR). */
 function Entorno() {
   const { gl, scene } = useThree();
@@ -112,10 +92,25 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
   const ultimaLectura = useRef(-1);
   const sigue = useRef(new THREE.Vector2());   // puntero suavizado: el telescopio lo sigue con inercia
 
-  const materiales = useMemo(() => ({
-    estructura: new THREE.MeshStandardMaterial({ color: LCT_COLORES.estructura, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide }),
-    plato: new THREE.MeshStandardMaterial({ color: LCT_COLORES.plato, metalness: 0.7, roughness: 0.28, side: THREE.DoubleSide }),
-  }), []);
+  const materiales = useMemo(() => {
+    const pulidos: THREE.Material[] = [];
+    const a = LCT_ESCENA.acabado;
+    return {
+      estructura: new THREE.MeshStandardMaterial({ color: LCT_COLORES.estructura, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide }),
+      plato: new THREE.MeshStandardMaterial({ color: LCT_COLORES.plato, metalness: 0.7, roughness: 0.28, side: THREE.DoubleSide }),
+      /** Aluminio pulido con capa de barniz: reflejos nítidos del estudio, borde de luz limpio. */
+      platoPulido: (aoMap: THREE.Texture | null) => {
+        const mat = new THREE.MeshPhysicalMaterial({
+          color: LCT_COLORES.panelPulido, metalness: 1, roughness: a.rugosidadPanel, aoMap, aoMapIntensity: 0.8,
+          clearcoat: a.barniz, clearcoatRoughness: 0.06, envMapIntensity: a.reflejoPanel,
+          side: THREE.DoubleSide, shadowSide: THREE.FrontSide,
+        });
+        pulidos.push(mat);
+        return mat;
+      },
+      liberarPulido: () => pulidos.forEach((m) => m.dispose()),
+    };
+  }, []);
 
   useLayoutEffect(() => {
     // La escena del GLB queda en caché entre montajes: la rotación y el material originales se guardan una sola
@@ -128,20 +123,19 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
       }
       if ((o as THREE.Mesh).isMesh) {
         const m = o as THREE.Mesh;
+        m.castShadow = true;      // el reticulado proyecta sombra sobre el plato y la montura
+        m.receiveShadow = true;
         const original = (Array.isArray(m.material) ? m.material[0] : m.material) as THREE.MeshStandardMaterial;
         m.userData.materialOriginal ??= original?.name ?? '';
-        if (original?.map) {
-          // GLB con texturas horneadas (pintura gastada, suciedad, oclusión): se usa por ambas caras, con
-          // normales suavizadas (cantos vivos sobre 35°) y paneles del plato en aluminio prístino.
-          if (!m.userData.suavizado) {
-            m.geometry = toCreasedNormals(m.geometry, deg(LCT_ESCENA.acabado.anguloCanto));
-            m.userData.suavizado = true;
-          }
+        if (m.userData.materialOriginal.startsWith('LCT_Panel')) {
+          // Plato: aluminio prístino y pulido. Del horneado solo se usa la oclusión (canal R del ORM).
+          m.material = materiales.platoPulido(original.aoMap);
+        } else if (original?.map) {
+          // Estructura con texturas horneadas (pintura gastada, suciedad, oclusión). El GLB ya trae normales
+          // suaves con cantos vivos; la sombra se calcula solo con la cara frontal para evitar acné.
           original.side = THREE.DoubleSide;
+          original.shadowSide = THREE.FrontSide;
           original.envMapIntensity = LCT_ESCENA.luz.reflejoTexturas;
-          original.onBeforeCompile = pulirPaneles;
-          original.customProgramCacheKey = () => 'lct-paneles';
-          original.needsUpdate = true;
         } else {
           m.material = m.userData.materialOriginal === 'Material.002' ? materiales.plato : materiales.estructura;
         }
@@ -150,7 +144,7 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
     alListo();
   }, [scene, materiales, alListo]);
 
-  useEffect(() => () => { materiales.estructura.dispose(); materiales.plato.dispose(); }, [materiales]);
+  useEffect(() => () => { materiales.estructura.dispose(); materiales.plato.dispose(); materiales.liberarPulido(); }, [materiales]);
 
   useFrame(({ clock }, dt) => {
     const t = clock.elapsedTime;
@@ -284,11 +278,22 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
     <Canvas
       frameloop={!activo ? 'never' : movimiento ? 'always' : 'demand'}
       dpr={[1, 2]}
-      gl={{ antialias: true, alpha: true, powerPreference: 'default' }}
+      gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
+      shadows="soft"
+      onCreated={({ gl }) => {
+        // AgX: rango alto sin quemar los brillos del metal; el OutputPass del posproceso lo aplica.
+        gl.toneMapping = THREE.AgXToneMapping;
+        gl.toneMappingExposure = LCT_ESCENA.exposicion;
+      }}
       camera={{ fov: LCT_ESCENA.fov, near: 0.5, far: 300, position: [0, LCT_ESCENA.inicio.alto, LCT_ESCENA.inicio.dist] }}
     >
       <hemisphereLight args={[LCT_COLORES.cielo, LCT_COLORES.suelo, l.hemisferio]} />
-      <directionalLight position={[-12, 9, 14]} intensity={l.clave} color={LCT_COLORES.clave} />
+      <directionalLight
+        position={[-12, 16, 14]} intensity={l.clave} color={LCT_COLORES.clave}
+        castShadow shadow-mapSize={[LCT_ESCENA.sombra.mapa, LCT_ESCENA.sombra.mapa]} shadow-bias={-0.0004} shadow-normalBias={0.04}
+        shadow-radius={LCT_ESCENA.sombra.suavidad} shadow-camera-left={-11} shadow-camera-right={11}
+        shadow-camera-top={14} shadow-camera-bottom={-4} shadow-camera-near={1} shadow-camera-far={60}
+      />
       <directionalLight position={[14, 10, -16]} intensity={l.borde} color={LCT_COLORES.borde} />
       <directionalLight position={[-16, 4, -12]} intensity={l.bordeCalido} color={LCT_COLORES.bordeCalido} />
       <spotLight position={[2, 14, 30]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
@@ -300,6 +305,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
         <Coreografia pose={pose} movimiento={movimiento} />
       </Suspense>
       <Camara pose={pose} movimiento={movimiento} />
+      <Posproceso />
     </Canvas>
   );
 }

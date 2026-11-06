@@ -32,9 +32,14 @@ type Escena = {
   /** Respuesta al puntero (o a la inclinación del teléfono): grados de giro del telescopio y de la cámara,
    *  metros de alto de cámara e inercia (más alto = sigue más rápido). */
   sensibilidad: { az: number; el: number; orbita: number; alto: number; inercia: number };
-  /** Acabado: ángulo de canto vivo al suavizar normales; umbral de luminancia (lineal) que separa los paneles
-   *  claros de la estructura oscura en la textura horneada, y rugosidad del panel pulido. */
-  acabado: { anguloCanto: number; umbral: [number, number]; rugosidadPanel: number };
+  /** Acabado del plato pulido: rugosidad, barniz (clearcoat) e intensidad de reflejos del estudio. */
+  acabado: { rugosidadPanel: number; barniz: number; reflejoPanel: number };
+  /** Exposición del tone mapping AgX. */
+  exposicion: number;
+  /** Bloom (UnrealBloomPass): solo lo que supera `umbral` (anillo y brillos especulares) florece. */
+  bloom: { fuerza: number; radio: number; umbral: number };
+  /** Sombra de la luz principal: tamaño del mapa y suavidad del borde (PCF suave). */
+  sombra: { mapa: number; suavidad: number };
   inicio: PoseEscena;
   reposo: PoseEscena;
   salida: PoseEscena;
@@ -54,7 +59,10 @@ export const LCT_ESCENA: Escena = {
   lectura: { azCero: 270 },
   luz: { hemisferio: 0.55, clave: 2.6, borde: 7.5, bordeCalido: 3.2, frente: 2.4, entorno: 0.7, reflejoTexturas: 1.5 },
   sensibilidad: { az: 16, el: 7, orbita: 7, alto: 1.4, inercia: 3.2 },
-  acabado: { anguloCanto: 35, umbral: [0.12, 0.16], rugosidadPanel: 0.12 },
+  acabado: { rugosidadPanel: 0.16, barniz: 0.5, reflejoPanel: 1.4 },
+  exposicion: 0.95,
+  bloom: { fuerza: 0.32, radio: 0.5, umbral: 0.92 },
+  sombra: { mapa: 2048, suavidad: 4 },
   inicio: { az: -130, el: 0, dist: 64, alto: 14, orbita: 18 },
   reposo: { az: -20, el: -55, dist: 46, alto: 6.5, orbita: 30 },
   salida: { az: 55, el: -75, dist: 42, alto: 3.5, orbita: 62 },

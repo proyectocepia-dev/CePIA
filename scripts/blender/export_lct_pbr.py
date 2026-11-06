@@ -23,7 +23,10 @@ OUT = args[0]
 TAM = {"Base": 1024, "Azimuth": 1024, "Elevation": int(args[1]) if len(args) > 1 else 2048}
 SKIP = {"Counterweight Bolts", "Plataform Bolts & Nuts", "Sidecab Bolts & Nuts"}
 BASE_FACES, KEEP = 2500, 0.05
-PANEL = "Material.002"  # paneles del plato en el .blend original
+# El plato ("Dish") va en un material propio: aluminio prístino y menos reducido, para que la superficie
+# no se rompa ni deje ver caras de atrás (la reducción fuerte creaba huecos y cruces en el casco del plato).
+PLATO = {"Dish"}
+PLATO_RATIO = 0.24
 
 az = bpy.data.objects["Azimuth Axis"]
 el = bpy.data.objects["Elevation axis"]
@@ -52,7 +55,7 @@ for o in bpy.data.objects:
         o.modifiers.new("weld", "WELD").merge_threshold = 0.0005
         d = o.modifiers.new("dec", "DECIMATE")
         n = len(o.data.polygons)
-        d.ratio = min(1.0, (BASE_FACES + KEEP * n) / n)
+        d.ratio = PLATO_RATIO if o.name in PLATO else min(1.0, (BASE_FACES + KEEP * n) / n)
 bpy.context.view_layer.update()
 deps = bpy.context.evaluated_depsgraph_get()
 
@@ -74,12 +77,11 @@ for o in list(bpy.data.objects):
     me.transform(mat)
     if mat.determinant() < 0:
         me.flip_normals()
-    es_panel = [bool(s and s.name == PANEL) for s in (list(me.materials) or [None])]
     start = len(g["bm"].faces)
     g["bm"].from_mesh(me)
     g["bm"].faces.ensure_lookup_table()
     for f in g["bm"].faces[start:]:
-        f.material_index = 1 if es_panel[min(f.material_index, len(es_panel) - 1)] else 0
+        f.material_index = 1 if o.name in PLATO else 0
     bpy.data.meshes.remove(me)
 
 for o in list(bpy.data.objects):
@@ -113,7 +115,7 @@ import math
 for ob in objs.values():
     # Sombreado suave con cantos vivos sobre 35 grados: superficies curvas sin facetas, aristas nítidas.
     ob.data.shade_smooth()
-    ob.data.set_sharpness_by_angle(angle=math.radians(35))
+    ob.data.set_sharp_from_angle(angle=math.radians(35))
     desplegar(ob)
     print("uv", ob.name)
 

@@ -3,7 +3,7 @@
 El visor de la portada (`src/components/lct/`) muestra el modelo 3D del Leighton Chajnantor Telescope sobre la foto.
 
 ## Cómo se comporta
-- **Carga diferida:** el código 3D (three + R3F + GSAP, ~300 KB gz) y el modelo (`public/models/lct.glb`, 3,1 MB con texturas) se descargan solo cuando el visor entra en pantalla. El texto del hero nunca espera al 3D.
+- **Carga diferida:** el código 3D (three + R3F + GSAP, ~300 KB gz) y el modelo (`public/models/lct.glb`, 2,7 MB con texturas) se descargan solo cuando el visor entra en pantalla. El texto del hero nunca espera al 3D.
 - **Solo el modelo:** la portada ya no usa el visor (radar) ni la foto. Mientras carga se ve el marco con un aviso "Cargando modelo".
 - **Movimiento reducido:** con `prefers-reduced-motion: reduce` el modelo se monta quieto en su pose de reposo (sin apuntado, deriva ni scroll) y se dibuja solo cuando hace falta. Sin WebGL o con ahorro de datos queda el marco con la ficha, sin modelo.
 - **Lámina técnica (brutalista):** marcas de corte, rótulo "Fig. 01 — LCT" y una ficha de bordes duros con plato, azimut y elevación; azimut y elevación son lecturas en vivo de la escena (10 Hz, escritas directo en el DOM). En móvil la ficha va bajo el modelo.
@@ -41,3 +41,13 @@ npx @gltf-transform/cli optimize lct-pbr-raw.glb public/models/lct.glb --compres
 
 Peso: 3,1 MB (geometría ~2,1 MB + texturas WebP ~1 MB). Si el GLB trae texturas, `LctCanvas` usa sus materiales
 tal cual; si no (GLB de `export_lct.py`), aplica los materiales planos de `lct-config.ts`.
+
+## Luz (investigación aplicada, 6-nov)
+Qué se aplicó y por qué:
+- **Tone mapping AgX** (`renderer.toneMapping`), exposición 0,95: rango alto sin quemar los brillos del metal pulido. AgX es menos saturado que ACES, así que luces y exposición se recalibraron (no se cambia de tone mapper sin reajustar).
+- **Posproceso con módulos de three** (`Posproceso.tsx`, sin dependencias nuevas): RenderPass con MSAA 4x en el buffer (el `antialias` del renderer no llega al composer) → UnrealBloomPass con umbral alto (solo florecen el anillo y los reflejos especulares) → OutputPass al final, que aplica el tone mapping y la conversión a sRGB. Sin OutputPass el bloom se ve mal.
+- **Sombras suaves** de la luz principal (mapa 2048, PCF suave): el reticulado proyecta sombra sobre el plato y la montura; `shadowSide: FrontSide` evita el acné en las caras dobles.
+- **Plato prístino**: material propio en el GLB (`LCT_Panel_*`) → `MeshPhysicalMaterial` de aluminio pulido con barniz (clearcoat), reflejando el estudio (`RoomEnvironment`); del horneado solo usa la oclusión.
+- **Geometría**: el plato ahora se reduce al 24 % (antes 5 %). Con la reducción fuerte el casco del plato se cruzaba consigo mismo y dejaba ver caras de atrás ("texturas que se pasan"). Normales suaves con cantos vivos sobre 35° desde Blender.
+
+Fuentes: [AgX en three.js (issue #27362)](https://github.com/mrdoob/three.js/issues/27362), [discusión AgX](https://discourse.threejs.org/t/is-agx-tonemapping-implemented-correctly/60609), [Three.js Journey: realistic render](https://threejs-journey.com/lessons/realistic-render), [bloom y OutputPass](https://discourse.threejs.org/t/cant-get-outer-glow-to-work-with-unrealbloompass/52643).
