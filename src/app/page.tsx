@@ -3,7 +3,8 @@ import Header from '@/components/Header';
 import Logo from '@/components/Logo';
 import NewsCard from '@/components/NewsCard';
 import Graticule from '@/components/Graticule';
-import Reticle from '@/components/Reticle';
+import HeroLct from '@/components/lct/HeroLct';
+import HeroReveal from '@/components/HeroReveal';
 import Sky from '@/components/Sky';
 import LineasAcordeon from '@/components/LineasAcordeon';
 import CategoryCoverflow, { type CoverflowItem } from '@/components/CategoryCoverflow';
@@ -27,6 +28,7 @@ export default function Inicio() {
         <Sky variante="hero" estrellas={260} />
         <Graticule />
         <Header />
+        <HeroReveal />
         <div className="c-watermark" aria-hidden="true"><Logo variant="iso" /></div>
         <div className="u-container hero__inner">
           <div className="hero__copy">
@@ -39,7 +41,7 @@ export default function Inicio() {
             </div>
           </div>
           <div className="hero__stage">
-            <Reticle foto="/img/lct-radiotelescopio.jpg" />
+            <HeroLct />
           </div>
           <dl className="readout">
             <div><dt>Sede</dt><dd>Concepción <span>36°49′S 73°03′O</span></dd></div>
