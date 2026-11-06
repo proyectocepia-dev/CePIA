@@ -480,3 +480,15 @@ body { overscroll-behavior-y: none; }
     .sky__nebula--a { animation: nebula-a-scroll linear both; animation-timeline: view(); }
   }
 }
+
+/* ---------- Capa inmersiva · LCT 3D en el visor de la portada ---------- */
+/* La foto queda debajo como respaldo; cuando el modelo carga, se desvanece y el 3D ocupa el visor.
+   La máscara funde el modelo con el anillo del visor (r = 232/600 ≈ 38,7 %). */
+.lct-stage { position: relative; }
+.lct-stage__canvas { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s var(--motion-ease-out);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 39.5%);
+          mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 39.5%); }
+.lct-stage__canvas canvas { display: block; }
+.lct-stage .reticle__img, .lct-stage .reticle svg g[clip-path] circle { transition: opacity 1.2s var(--motion-ease-out); }
+.lct-stage[data-estado="listo"] .lct-stage__canvas { opacity: 1; }
+.lct-stage[data-estado="listo"] .reticle__img { opacity: 0; }

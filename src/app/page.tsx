@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import Logo from '@/components/Logo';
 import NewsCard from '@/components/NewsCard';
 import Graticule from '@/components/Graticule';
-import Reticle from '@/components/Reticle';
+import HeroLct from '@/components/lct/HeroLct';
 import Sky from '@/components/Sky';
 import { categorias, noticias } from '@/lib/content';
 
@@ -28,7 +28,7 @@ export default function Inicio() {
             </div>
           </div>
           <div className="hero__stage">
-            <Reticle foto="/img/lct-radiotelescopio.jpg" />
+            <HeroLct foto="/img/lct-radiotelescopio.jpg" />
           </div>
           <dl className="readout">
             <div><dt>Sede</dt><dd>Concepción <span>36°49′S 73°03′O</span></dd></div>
