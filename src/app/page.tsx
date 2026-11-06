@@ -5,6 +5,7 @@ import NewsCard from '@/components/NewsCard';
 import Graticule from '@/components/Graticule';
 import Reticle from '@/components/Reticle';
 import Sky from '@/components/Sky';
+import LineasAcordeon from '@/components/LineasAcordeon';
 import { categorias, noticias } from '@/lib/content';
 
 export default function Inicio() {
@@ -65,23 +66,13 @@ export default function Inicio() {
           </div>
         </section>
 
-        <section className="s-light" aria-labelledby="lineas">
+        <section className="s-night s-night--deep" aria-labelledby="lineas">
           <div className="u-container">
             <div className="sec-head sec-head--row">
               <h2 id="lineas" className="t-h2">Líneas de trabajo</h2>
               <Link href="/proyectos">Todos los proyectos</Link>
             </div>
-            <ul className="index-list">
-              {cats.map((c) => (
-                <li key={c.id}>
-                  <Link href={`/proyectos/${c.id}`} prefetch={false}>
-                    <h3>{c.nombre}</h3>
-                    <p>{c.resumen}</p>
-                    <span className="index-list__go">Ver línea</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <LineasAcordeon items={cats.map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen }))} />
           </div>
         </section>
 

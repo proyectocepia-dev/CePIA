@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import PageHero from '@/components/PageHero';
 import PubList from '@/components/PubList';
+import CategoryCoverflow from '@/components/CategoryCoverflow';
 import { categorias, proyectos, publicaciones, siglas } from '@/lib/content';
 
 export const metadata = { title: 'Proyectos' };
@@ -24,22 +25,13 @@ export default function Proyectos() {
           </div>
         </section>
 
-        <section className="s-night s-night--deep u-hex" aria-labelledby="lineas">
+        <section className="s-night s-night--deep" aria-labelledby="lineas">
           <div className="u-container">
             <div className="sec-head">
               <span className="c-rule c-meta">Líneas de trabajo</span>
               <h2 id="lineas" className="t-h2">Categorías</h2>
             </div>
-            <div className="grid-cards">
-              {categorias().map((c, i) => (
-                <Link key={c.id} className="c-project-card" href={`/proyectos/${c.id}`} prefetch={false}>
-                  <div className={`c-project-card__art ${['art-1', 'art-2', 'art-3'][i % 3]}`}><span>{c.nombre}</span></div>
-                  <span className="card-top"><span className="c-meta">{contar(c.id)} {contar(c.id) === 1 ? 'proyecto' : 'proyectos'}</span></span>
-                  <h3 className="t-h4">{c.nombre}</h3>
-                  <p>{c.resumen}</p>
-                </Link>
-              ))}
-            </div>
+            <CategoryCoverflow items={categorias().map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen, n: contar(c.id) }))} />
           </div>
         </section>
 
