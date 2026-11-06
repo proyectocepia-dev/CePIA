@@ -34,6 +34,11 @@ type Escena = {
   sensibilidad: { az: number; el: number; orbita: number; alto: number; inercia: number };
   /** Acabado del plato pulido: rugosidad, barniz (clearcoat) e intensidad de reflejos del estudio. */
   acabado: { rugosidadPanel: number; barniz: number; reflejoPanel: number };
+  /** Rango de inclinación del plato desde el cenit (grados): -40 = 50° de elevación, el mínimo sin cruzarse
+   *  con la montura en este modelo; -2 = casi cenit. */
+  limiteEl: [number, number];
+  /** Corrimiento horizontal del encuadre (filmOffset, mm de película): negativo lleva el telescopio a la derecha. */
+  encuadre: { escritorio: number; movil: number };
   /** Exposición del tone mapping AgX. */
   exposicion: number;
   /** Bloom (UnrealBloomPass): solo lo que supera `umbral` (anillo y brillos especulares) florece. */
@@ -47,9 +52,9 @@ type Escena = {
 
 export const LCT_ESCENA: Escena = {
   fov: 28,
-  objetivo: [0, 5.2, 0],
+  objetivo: [0, 7.8, 0],
   anillo: {
-    centro: [0, 7.8, 0], radio: 5.8, atras: 4.5,
+    centro: [0, 8.6, 0], radio: 6.2, atras: 4.5,
     capas: [
       { ancho: 0.32, opacidad: 0.32, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
       { ancho: 0.11, opacidad: 0.6, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
@@ -60,10 +65,14 @@ export const LCT_ESCENA: Escena = {
   luz: { hemisferio: 0.55, clave: 2.6, borde: 7.5, bordeCalido: 3.2, frente: 2.4, entorno: 0.7, reflejoTexturas: 1.5 },
   sensibilidad: { az: 16, el: 7, orbita: 7, alto: 1.4, inercia: 3.2 },
   acabado: { rugosidadPanel: 0.16, barniz: 0.5, reflejoPanel: 1.4 },
+  limiteEl: [-40, -2],
+  encuadre: { escritorio: -5.5, movil: 0 },
   exposicion: 0.95,
   bloom: { fuerza: 0.32, radio: 0.5, umbral: 0.92 },
   sombra: { mapa: 2048, suavidad: 4 },
-  inicio: { az: -130, el: 0, dist: 64, alto: 14, orbita: 18 },
-  reposo: { az: -20, el: -55, dist: 46, alto: 6.5, orbita: 30 },
-  salida: { az: 55, el: -75, dist: 42, alto: 3.5, orbita: 62 },
+  // Cámara alta mirando hacia abajo: como el plato trabaja hacia el cenit, se le ve de frente desde arriba.
+  // El scroll lleva el plato hacia el cenit y la cámara sube sobre él (vista cenital).
+  inicio: { az: 60, el: 0, dist: 46, alto: 48, orbita: 0 },
+  reposo: { az: -10, el: -36, dist: 42, alto: 38, orbita: 0 },
+  salida: { az: 15, el: -6, dist: 22, alto: 54, orbita: 20 },
 };

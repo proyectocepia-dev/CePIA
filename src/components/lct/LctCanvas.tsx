@@ -59,9 +59,16 @@ function Puntero({ movimiento }: { movimiento: boolean }) {
     };
     window.addEventListener('pointermove', mover, { passive: true });
     window.addEventListener('deviceorientation', inclinar, { passive: true });
+    // iPhone: el giroscopio requiere permiso pedido desde un gesto; se pide una vez, al primer toque.
+    const pedirPermiso = () => {
+      const D = DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> };
+      D.requestPermission?.().catch(() => undefined);
+    };
+    window.addEventListener('touchend', pedirPermiso, { once: true, passive: true });
     return () => {
       window.removeEventListener('pointermove', mover);
       window.removeEventListener('deviceorientation', inclinar);
+      window.removeEventListener('touchend', pedirPermiso);
       puntero.set(0, 0);
     };
   }, [movimiento]);
@@ -153,7 +160,12 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
     // El seguimiento se apaga a medida que avanza la salida por scroll (y no existe sin movimiento).
     const deriva = movimiento ? 1 - pose.salida : 0;
     const az = mezclar(pose, 'az') + (deg(4) * Math.sin(t * 0.07) + deg(sens.az) * sigue.current.x) * deriva;
-    const el = mezclar(pose, 'el') + (deg(1.5) * Math.sin(t * 0.11 + 1) + deg(sens.el) * sigue.current.y) * deriva;
+    // La elevación se limita al rango del LCT real: bajo ese ángulo el plato se cruza con la montura.
+    const lim = LCT_ESCENA.limiteEl;
+    const el = THREE.MathUtils.clamp(
+      mezclar(pose, 'el') + (deg(1.5) * Math.sin(t * 0.11 + 1) + deg(sens.el) * sigue.current.y) * deriva,
+      deg(lim[0]), deg(lim[1]),
+    );
     if (alLeer && t - ultimaLectura.current >= LECTURA_CADA) {
       ultimaLectura.current = t;
       const azGrados = THREE.MathUtils.euclideanModulo(LCT_ESCENA.lectura.azCero - THREE.MathUtils.radToDeg(az), 360);
@@ -210,7 +222,7 @@ function Anillo({ pose }: { pose: Pose }) {
     const g = grupo.current;
     if (!g) return;
     // Se ubica detrás del telescopio respecto de la cámara, para que el plato lo tape en parte.
-    dir.copy(camera.position).sub(centro).setY(0).normalize();
+    dir.copy(camera.position).sub(centro).normalize();
     g.position.copy(centro).addScaledVector(dir, -LCT_ESCENA.anillo.atras);
     g.lookAt(camera.position);
     capas.forEach((c) => { c.mat.opacity = pose.anillo * c.opacidad; });
@@ -228,7 +240,7 @@ function Anillo({ pose }: { pose: Pose }) {
 }
 
 function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
-  const { camera } = useThree();
+  const { camera, size } = useThree();
   const mirar = useMemo(() => new THREE.Vector3(...LCT_ESCENA.objetivo), []);
   const suave = useRef(new THREE.Vector2());
   useFrame((_, dt) => {
@@ -239,6 +251,10 @@ function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
     const d = mezclar(pose, 'dist');
     camera.position.set(Math.sin(a) * d, h, Math.cos(a) * d);
     camera.lookAt(mirar);
+    // Encuadre: en escritorio el telescopio se corre a la derecha del centro para dejar aire al título.
+    const pc = camera as THREE.PerspectiveCamera;
+    const corrimiento = size.width >= 960 ? LCT_ESCENA.encuadre.escritorio : LCT_ESCENA.encuadre.movil;
+    if (pc.filmOffset !== corrimiento) { pc.filmOffset = corrimiento; pc.updateProjectionMatrix(); }
   });
   return null;
 }
@@ -296,7 +312,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
       />
       <directionalLight position={[14, 10, -16]} intensity={l.borde} color={LCT_COLORES.borde} />
       <directionalLight position={[-16, 4, -12]} intensity={l.bordeCalido} color={LCT_COLORES.bordeCalido} />
-      <spotLight position={[2, 14, 30]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
+      <spotLight position={[4, 46, 34]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
       <Puntero movimiento={movimiento} />
       <Entorno />
       <Suspense fallback={null}>

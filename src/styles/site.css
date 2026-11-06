@@ -550,3 +550,19 @@ body { overscroll-behavior-y: none; }
   .lct-stage__fig { left: 32px; }
   .lct-stage__ficha dl > div { padding: var(--space-2) var(--space-3) var(--space-3); }
 }
+
+/* Escritorio: el LCT ocupa todo el hero, como escena de fondo. El telescopio queda al centro-derecha (corrimiento
+   de cámara en lct-config) y el texto a la izquierda, sobre su velo. La ficha y el rótulo se alinean con el
+   borde del contenedor y quedan sobre la barra de lecturas. */
+@media (min-width: 960px) {
+  .hero > .c-header, .hero .c-header { position: relative; z-index: 2; }
+  .hero__stage { position: absolute; inset: 0; width: auto; justify-self: stretch; align-self: stretch; z-index: 0; pointer-events: none; --borde: max(var(--space-5), calc((100vw - var(--layout-container)) / 2)); }
+  .lct-stage { position: absolute; inset: 0; aspect-ratio: auto; padding: 0; }
+  .lct-stage__canvas { inset: 0; }
+  .lct-stage__ficha { right: var(--borde); bottom: calc(var(--space-9) + var(--space-7)); }
+  .lct-stage__fig { top: calc(var(--space-9) + var(--space-6)); left: auto; right: var(--borde); transform: none; }
+  .lct-stage__marca--a { top: calc(var(--space-9) + var(--space-5)); left: 50%; }
+  .lct-stage__marca--b { right: calc(var(--borde) - var(--space-3)); bottom: calc(var(--space-9) + var(--space-7) - var(--space-3)); }
+  .lct-stage__carga { left: 68%; }
+  .hero__inner { align-content: center; }
+}

@@ -51,3 +51,12 @@ Qué se aplicó y por qué:
 - **Geometría**: el plato ahora se reduce al 24 % (antes 5 %). Con la reducción fuerte el casco del plato se cruzaba consigo mismo y dejaba ver caras de atrás ("texturas que se pasan"). Normales suaves con cantos vivos sobre 35° desde Blender.
 
 Fuentes: [AgX en three.js (issue #27362)](https://github.com/mrdoob/three.js/issues/27362), [discusión AgX](https://discourse.threejs.org/t/is-agx-tonemapping-implemented-correctly/60609), [Three.js Journey: realistic render](https://threejs-journey.com/lessons/realistic-render), [bloom y OutputPass](https://discourse.threejs.org/t/cant-get-outer-glow-to-work-with-unrealbloompass/52643).
+
+## Encuadre y movimiento (rediseño del 6-nov, tarde)
+- El LCT trabaja hacia el cenit: el plato no baja de 50° de elevación (`limiteEl`), porque bajo ese ángulo el
+  modelo se cruza con la montura (eso era lo que hacía "subir" texturas por el plato).
+- Por eso la cámara mira **desde arriba**: así el plato apuntando alto queda de frente. El scroll lo lleva al
+  cenit y la cámara sube hasta una vista casi cenital.
+- Escritorio: la escena ocupa todo el hero y el telescopio queda al centro-derecha con `filmOffset`
+  (`encuadre`), dejando el título legible a la izquierda. Móvil: el escenario va bajo los botones, a todo el ancho.
+- Móvil: el telescopio y la cámara siguen el giroscopio; en iPhone el permiso se pide al primer toque.
