@@ -1,0 +1,267 @@
+/* CePIA · componentes base v0.4
+   Medidas: serie de Fibonacci (tokens space-*, radius-*, font-size-*). Grilla áurea 8fr / 13fr.
+   Carácter: espacial y tecnológico (trama hexagonal, retículas finas, rótulos mono), no solemne.
+   Legibilidad (público STEM, a menudo con baja visión): cuerpo 18px / 1.6, mínimo 15px en texto corrido y 13px en rótulos,
+   contraste AA o más en todo texto, Light solo ≥24px, Thin fuera del sitio, enlaces siempre subrayados.
+   Requiere tokens.css antes de este archivo. Todo color, radio, sombra y medida sale de los tokens.
+   Convención: clases en español-neutro cortas, prefijo .c- para componentes, .s- para secciones, .u- utilidades. */
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; overflow-x: clip; }   /* marcas de agua y tramas nunca generan scroll lateral */
+body {
+  margin: 0;
+  font-family: var(--font-family-sans);
+  font-weight: var(--font-weight-book);
+  font-size: var(--font-size-lg);
+  line-height: var(--font-line-height-normal);
+  color: var(--color-text-on-light);
+  background: var(--color-bg-light);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg, video { max-width: 100%; display: block; }
+h1, h2, h3, h4 { margin: 0; font-weight: var(--font-weight-medium); line-height: var(--font-line-height-snug); text-wrap: balance; }
+p { margin: 0; max-width: 65ch; }
+strong, b { font-weight: var(--font-weight-bold); }
+a { color: var(--color-link-on-light); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; border-radius: 4px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* ---------- Tipografía ---------- */
+.t-display { font-size: var(--font-size-6xl); font-weight: var(--font-weight-medium); line-height: var(--font-line-height-tight); letter-spacing: var(--font-tracking-tight); }
+.t-h1 { font-size: var(--font-size-5xl); line-height: var(--font-line-height-tight); letter-spacing: var(--font-tracking-tight); }
+.t-h2 { font-size: var(--font-size-4xl); }
+.t-h3 { font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); }
+.t-h4 { font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); }
+.t-lead { font-size: var(--font-size-xl); line-height: var(--font-line-height-relaxed); }
+.t-small { font-size: var(--font-size-sm); }
+.c-eyebrow {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-book);   /* Light se pierde en mayúsculas chicas: legibilidad primero */
+  text-transform: uppercase;
+  letter-spacing: var(--font-tracking-wide);
+}
+.c-eyebrow--sep > * + *::before { content: "|"; padding-inline: 0.4em; opacity: .7; }
+.c-prompt::before { content: "> "; }               /* bajada estilo terminal de la referencia */
+
+/* ---------- Layout ---------- */
+.u-container {
+  width: 100%;
+  max-width: calc(var(--layout-container) + 2 * var(--space-gutter));
+  margin-inline: auto;
+  padding-left: max(var(--space-gutter), env(safe-area-inset-left, 0px));
+  padding-right: max(var(--space-gutter), env(safe-area-inset-right, 0px));
+}
+.u-stack { display: flex; flex-direction: column; gap: var(--space-5); }
+.u-grid-2 { display: grid; gap: var(--space-7); grid-template-columns: 1fr; align-items: center; }
+@media (min-width: 900px) { .u-grid-2 { grid-template-columns: 8fr 13fr; } .u-grid-2--rev { grid-template-columns: 13fr 8fr; } }
+.u-grid-2 > * { min-width: 0; }
+
+/* ---------- Secciones ---------- */
+.s-light { background: var(--color-bg-light); color: var(--color-text-on-light); padding-block: var(--space-section); position: relative; }
+.s-night {
+  background: var(--color-bg-dark);
+  color: var(--color-text-on-dark);
+  padding-block: var(--space-section);
+  position: relative;
+  isolation: isolate;
+}
+.s-night a:not([class]) { color: var(--color-link-on-dark); }
+.s-night--stars { background: var(--color-bg-dark) var(--s-night-image, none) center / cover no-repeat; }
+.s-hero {
+  background: var(--gradient-nebula);
+  color: var(--color-text-on-dark);
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  text-shadow: 0 1px 14px rgba(0,0,0,.35);   /* refuerzo de contraste sobre la nebulosa */
+}
+.s-hero--image { background: var(--color-night-900) var(--s-hero-image) center / cover no-repeat; }
+.s-hero::after {               /* grano fino: evita bandas en el degradado y da textura fotográfica */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: .14; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Pestaña curva: el borde superior de una sección oscura sube a la izquierda (firma visual de la referencia).
+   Se usa en una sección .s-night que sigue a una .s-light. --tab-w define el ancho de la pestaña. */
+.s-tab { --tab-h: var(--radius-xl); --tab-w: min(38.2%, 466px); --tab-r: var(--radius-lg); --tab-f: 13px; }   /* 38,2% = 1/φ² */
+.s-tab::before {
+  content: ""; position: absolute; left: 0; top: calc(var(--tab-h) * -1 + 1px); width: var(--tab-w); height: var(--tab-h);
+  background: var(--color-bg-dark); border-top-right-radius: var(--tab-r);
+}
+.s-tab::after {
+  content: ""; position: absolute; left: calc(var(--tab-w) - 1px); top: calc(var(--tab-f) * -1 + 1px); width: var(--tab-f); height: var(--tab-f);
+  background: radial-gradient(circle at 100% 0, transparent calc(var(--tab-f) - .5px), var(--color-bg-dark) var(--tab-f));
+}
+
+/* ---------- Header ---------- */
+.c-header { position: absolute; inset: 0 0 auto; z-index: var(--z-header); color: var(--color-text-on-dark); }
+.c-header__bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); padding-block: var(--space-5); }
+.c-header__logo { width: 89px; color: currentColor; opacity: .92; transition: opacity var(--motion-duration-fast); }
+.c-header__logo:hover { opacity: 1; }
+.c-nav { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); list-style: none; margin: 0; padding: 0; }
+.c-nav a { color: inherit; text-decoration: none; font-weight: var(--font-weight-book); font-size: var(--font-size-md); padding-block: var(--space-1); border-bottom: 1px solid transparent; transition: border-color var(--motion-duration-fast) var(--motion-ease-out); }
+.c-nav a:hover, .c-nav a[aria-current="page"] { border-color: var(--color-accent); }
+
+/* ---------- Botones ---------- */
+.c-btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  font: inherit; font-size: var(--font-size-md); font-weight: var(--font-weight-medium);
+  padding: 0.8em 1.4em; border-radius: var(--radius-pill); border: 1px solid transparent;
+  text-decoration: none; cursor: pointer;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-out), background-color var(--motion-duration-base) var(--motion-ease-out), border-color var(--motion-duration-base);
+}
+.c-btn:hover { transform: translateY(-1px); }
+.c-btn--primary { background: var(--color-accent); color: var(--color-ink-900); }      /* texto oscuro: blanco no alcanza AA sobre naranja */
+.c-btn--primary:hover { background: var(--color-orange-300); }
+.c-btn--ghost { background: transparent; color: var(--color-text-on-dark); border-color: var(--color-border-on-dark); }
+.c-btn--ghost:hover { border-color: var(--color-text-on-dark); }
+.c-btn--dark { background: var(--color-night-900); color: var(--color-text-on-dark); }
+.c-btn--arrow::after { content: ">>>"; letter-spacing: -0.08em; font-weight: var(--font-weight-bold); }
+
+/* ---------- Tarjetas ---------- */
+/* Tarjeta de imagen: foto nocturna, esquina grande, sombra profunda, rótulo en mayúsculas arriba a la izquierda. */
+.c-media-card {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-card); background: var(--color-night-900); color: var(--color-text-on-dark);
+  aspect-ratio: 16 / 10; max-width: 100%;
+}
+.c-media-card img { width: 100%; height: 100%; object-fit: cover; }
+.c-media-card__label { position: absolute; top: var(--space-6); left: var(--space-6); z-index: 1; }
+.c-media-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,16,18,.45), transparent 35%); }
+@media (min-width: 900px) { .c-media-card--bleed { margin-right: calc(var(--space-gutter) * -1 - max(0px, (100vw - var(--layout-container) - 2 * var(--space-gutter)) / 2)); border-top-right-radius: 0; border-bottom-right-radius: 0; } }
+
+/* Tarjeta contorno sobre fondo oscuro (p. ej. "Equipo Comunicaciones"). */
+.c-outline-card {
+  display: flex; align-items: center; gap: var(--space-5);
+  border: 1px solid var(--color-border-on-dark); border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6); background: rgba(255,255,255,.02);
+  backdrop-filter: blur(2px);
+}
+.c-outline-card > :last-child { min-width: 0; }
+
+/* Tarjeta de proyecto (los 12 proyectos). */
+.c-project-card {
+  display: flex; flex-direction: column; gap: var(--space-3);
+  background: var(--color-bg-dark-raised); color: var(--color-text-on-dark);
+  border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius-lg);
+  padding: var(--space-5); text-decoration: none;
+  transition: transform var(--motion-duration-base) var(--motion-ease-out), box-shadow var(--motion-duration-base) var(--motion-ease-out);
+}
+.c-project-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+.c-project-card__art { aspect-ratio: 4 / 3; border-radius: var(--radius-md); background: var(--gradient-horizon); overflow: hidden; }
+.c-project-card__art img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Tarjeta de noticia (sección clara). */
+.c-news-card { display: flex; flex-direction: column; gap: var(--space-3); background: var(--color-bg-light-raised); border-radius: var(--radius-lg); padding: var(--space-5); box-shadow: var(--shadow-md); color: var(--color-text-on-light); text-decoration: none; }
+.c-news-card time { font-size: var(--font-size-sm); color: var(--color-text-on-light-muted); font-variant-numeric: tabular-nums; }
+
+/* ---------- Insignia circular con isotipo ---------- */
+.c-badge {
+  flex: none; width: 96px; aspect-ratio: 1; border-radius: 50%;
+  display: grid; place-items: center; color: #fff;
+  background: var(--gradient-badge);
+  box-shadow: 0 0 0 4px rgba(255,255,255,.9), var(--shadow-md);
+}
+.c-badge svg { width: 52%; }
+
+/* ---------- Barra degradado (horizonte) ---------- */
+.c-horizon-bar { background: var(--gradient-horizon); color: #fff; border-radius: var(--radius-md); padding: var(--space-6); }
+
+/* ---------- Bloque destacado del proyecto externo (plataforma radiotelescopio escolar) ---------- */
+.c-feature {
+  display: grid; gap: var(--space-5); align-items: center; grid-template-columns: 1fr;
+  background: var(--gradient-horizon); color: #fff; border-radius: var(--radius-lg);
+  padding: clamp(1.5rem, 1rem + 3vw, 3.5rem); box-shadow: var(--shadow-glow); overflow: hidden; position: relative;
+}
+@media (min-width: 900px) { .c-feature { grid-template-columns: 1.2fr 1fr; } }
+.c-feature > * { min-width: 0; }
+
+/* ---------- Franja de logos institucionales ---------- */
+.c-partners { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-5) var(--space-7); list-style: none; margin: 0; padding: 0; }
+.c-partners img, .c-partners svg { height: 40px; width: auto; filter: brightness(0) invert(1); opacity: .9; }
+
+/* ---------- Chips ---------- */
+.c-chip { align-self: flex-start; display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); text-transform: uppercase; letter-spacing: var(--font-tracking-caps); padding: 0.35em 0.8em; border-radius: var(--radius-pill); border: 1px solid currentColor; }
+.c-chip--accent { color: var(--color-orange-300); }
+.s-light .c-chip--accent { color: var(--color-accent-text-on-light); }
+
+/* ---------- Formulario ---------- */
+.c-field { display: flex; flex-direction: column; gap: var(--space-2); }
+.c-field label { font-size: var(--font-size-sm); font-weight: var(--font-weight-medium); }
+.c-input, .c-select, .c-textarea {
+  font: inherit; font-size: var(--font-size-md); color: var(--color-text-on-light);
+  background: var(--color-bg-light-raised); border: 1px solid var(--color-border-on-light);
+  border-radius: var(--radius-sm); padding: 0.75em 0.9em; width: 100%;
+  transition: border-color var(--motion-duration-fast), box-shadow var(--motion-duration-fast);
+}
+.c-input:focus, .c-select:focus, .c-textarea:focus { outline: none; border-color: var(--color-blue-500); box-shadow: 0 0 0 3px var(--color-blue-100); }
+
+/* ---------- Footer ---------- */
+.c-footer { background: var(--color-night-1000); color: var(--color-text-on-dark-muted); padding-block: var(--space-8) var(--space-6); font-size: var(--font-size-sm); }
+.c-footer a { color: var(--color-text-on-dark); }
+
+/* ---------- v0.3 · Lenguaje espacial y tecnológico ---------- */
+
+/* Trama hexagonal (plato de radiotelescopio). Capa decorativa: aria-hidden, sin eventos, detrás del contenido. */
+.u-hex, .u-hex-dish { position: relative; isolation: isolate; }
+.u-hex::before, .u-hex-dish::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: var(--pattern-hex-dark); background-size: var(--pattern-hex-size);
+}
+.s-light.u-hex::before, .s-light.u-hex-dish::before { background-image: var(--pattern-hex-light); }
+/* Variante plato: la trama nace en un punto y se desvanece en círculo. --dish-x / --dish-y / --dish-size la ubican. */
+.u-hex-dish::before {
+  -webkit-mask-image: radial-gradient(circle var(--dish-size, 610px) at var(--dish-x, 80%) var(--dish-y, 50%), #000 0%, rgba(0,0,0,.5) 55%, transparent 100%);
+          mask-image: radial-gradient(circle var(--dish-size, 610px) at var(--dish-x, 80%) var(--dish-y, 50%), #000 0%, rgba(0,0,0,.5) 55%, transparent 100%);
+}
+
+/* Rótulo técnico en mono: coordenadas, bandas, fechas. */
+.c-meta { font-family: var(--font-family-mono); font-size: var(--font-size-xs); letter-spacing: var(--font-tracking-wide); text-transform: uppercase; font-variant-numeric: tabular-nums; }
+.s-night .c-meta, .s-hero .c-meta { color: var(--color-text-on-dark-muted); }
+.s-light .c-meta, .s-rest .c-meta { color: var(--color-text-on-light-muted); }
+
+/* Marcas de esquina tipo retícula de instrumento. Se aplican a cualquier bloque con .c-frame. */
+.c-frame { position: relative; --frame-c: var(--color-hairline-on-dark); --frame-l: 13px; }
+.s-light .c-frame, .s-rest .c-frame { --frame-c: var(--color-hairline-on-light); }
+.c-frame::after {
+  content: ""; position: absolute; inset: calc(var(--space-3) * -1); pointer-events: none;
+  background:
+    linear-gradient(var(--frame-c), var(--frame-c)) top left / var(--frame-l) 1px,
+    linear-gradient(var(--frame-c), var(--frame-c)) top left / 1px var(--frame-l),
+    linear-gradient(var(--frame-c), var(--frame-c)) top right / var(--frame-l) 1px,
+    linear-gradient(var(--frame-c), var(--frame-c)) top right / 1px var(--frame-l),
+    linear-gradient(var(--frame-c), var(--frame-c)) bottom left / var(--frame-l) 1px,
+    linear-gradient(var(--frame-c), var(--frame-c)) bottom left / 1px var(--frame-l),
+    linear-gradient(var(--frame-c), var(--frame-c)) bottom right / var(--frame-l) 1px,
+    linear-gradient(var(--frame-c), var(--frame-c)) bottom right / 1px var(--frame-l);
+  background-repeat: no-repeat;
+}
+
+/* Regla técnica: línea fina con rótulo mono. */
+.c-rule { display: flex; align-items: center; gap: var(--space-4); }
+.c-rule::after { content: ""; flex: 1; height: 1px; background: var(--color-hairline-on-dark); }
+.s-light .c-rule::after { background: var(--color-hairline-on-light); }
+
+/* Logo como marca de agua: integrado al fondo, nunca protagonista. Decorativo (aria-hidden). */
+.c-watermark { position: absolute; z-index: -1; pointer-events: none; color: #fff; opacity: .05; }
+.c-watermark svg { width: 100%; height: auto; }
+
+/* Footer con el logotipo como horizonte: grande, recortado por el borde inferior y casi transparente. */
+.c-footer { position: relative; overflow: hidden; isolation: isolate; }
+.c-footer__mark { position: absolute; left: 50%; bottom: -8%; width: min(1220px, 110%); transform: translateX(-50%); color: #fff; opacity: .045; z-index: -1; pointer-events: none; }
+.c-footer__mark svg { width: 100%; height: auto; }
+
+/* ---------- v0.4 · Descansos en gris lunar ---------- */
+/* Banda de pausa entre secciones: gris más profundo que el fondo claro, misma tinta. */
+.s-rest { background: var(--color-bg-light-rest); color: var(--color-text-on-light); padding-block: var(--space-8); position: relative; }
+.s-rest .c-meta { color: var(--color-text-on-light-muted); }
+.s-rest.u-hex::before, .s-rest.u-hex-dish::before { background-image: var(--pattern-hex-light); }
+.s-rest .c-rule::after { background: var(--color-hairline-on-light); }
+
+/* Co-marca UdeC (v0.4.1): siempre secundaria al logo CePIA. Más pequeña, separada por una línea fina y atenuada. */
+.c-cobrand { display: flex; align-items: center; gap: var(--space-5); }
+.c-cobrand__sep { width: 1px; align-self: stretch; min-height: 21px; background: var(--color-hairline-on-dark); }
+.c-cobrand__udec { height: 26px; width: auto; opacity: .72; }
+.c-cobrand--foot .c-cobrand__udec { height: 34px; }
+@media (max-width: 640px) { .c-header .c-cobrand__sep, .c-header .c-cobrand__udec { display: none; } }

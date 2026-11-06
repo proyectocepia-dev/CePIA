@@ -1,0 +1,7 @@
+[
+  { "id": "laboratorio-astronomia", "nombre": "Laboratorio CePIA", "bloque": "dependencias", "descripcion": "Laboratorio del centro en el Departamento de Astronomía de la Universidad de Concepción." },
+  { "id": "wenulafken", "nombre": "Observatorio WenuLafken", "bloque": "dependencias", "descripcion": "Observatorio en el campus de la Universidad de Concepción, donde se ubicarán laboratorios y salas de control del LCT." },
+  { "id": "equipamiento-pendiente", "nombre": "Equipamiento disponible", "bloque": "equipamiento", "descripcion": "Lista por recibir del centro.", "editorial": "por-confirmar" },
+  { "id": "estacion-criogenica", "nombre": "Estación criogénica", "bloque": "equipos-desarrollados", "descripcion": "Cámara criogénica para probar dispositivos de radioastronomía a temperaturas de pocos kelvin." },
+  { "id": "cargas-calibracion", "nombre": "Cargas de calibración", "bloque": "equipos-desarrollados", "descripcion": "Cargas de calibración fabricadas para el radiotelescopio LLAMA (Argentina y Brasil)." }
+]

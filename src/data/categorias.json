@@ -1,0 +1,42 @@
+[
+  {
+    "id": "milimetricas-submm",
+    "nombre": "Milimétricas/Submm",
+    "orden": 1,
+    "resumen": "Receptores y componentes para observar en frecuencias milimétricas y submilimétricas.",
+    "parrafo": "Desarrollamos componentes y receptores para radiotelescopios que observan en longitudes de onda milimétricas y submilimétricas. El trabajo actual incluye el desarrollo de un pixel de 3 mm, técnicas de integración híbrida y detectores mKID.",
+    "notaInterna": "Cuidar propiedad intelectual. No nombrar proyectos en ejecución (TA, Fondecyt). MMICs confirmado aquí (David, 5-nov)."
+  },
+  {
+    "id": "atmosfera",
+    "nombre": "Atmósfera",
+    "orden": 2,
+    "resumen": "Instrumentos para medir la atmósfera y la ionósfera sobre los sitios de observación.",
+    "parrafo": "La atmósfera limita lo que un radiotelescopio puede ver. Construimos radiómetros que miden el vapor de agua sobre los sitios de observación y un riómetro para estudiar la ionósfera, y usamos sus datos para planificar y corregir observaciones.",
+    "notaInterna": "EASY se trata como ISI (David, 5-nov)."
+  },
+  {
+    "id": "colaboraciones",
+    "nombre": "Colaboraciones",
+    "orden": 3,
+    "resumen": "Proyectos internacionales en los que CePIA participa junto a otros centros.",
+    "parrafo": "Participamos en proyectos internacionales liderados por otros centros, aportando ingeniería, instrumentación y trabajo en terreno.",
+    "notaInterna": "Incluye CoDE: desarrollo asociado a su sistema de control (David, 5-nov)."
+  },
+  {
+    "id": "transferencia-tecnologica",
+    "nombre": "Transferencia Tecnológica",
+    "orden": 4,
+    "resumen": "Tecnología de la astronomía aplicada a la industria y a otras disciplinas.",
+    "parrafo": "Llevamos técnicas desarrolladas para la astronomía a problemas de la industria y de otras disciplinas, como la medición de humedad en madera con radiometría.",
+    "notaInterna": "DTS: describir sin datos confidenciales. Manquetayil es el mismo proyecto que DTS (David, 5-nov)."
+  },
+  {
+    "id": "academicos",
+    "nombre": "Académicos",
+    "orden": 5,
+    "resumen": "Proyectos de investigación académica del centro.",
+    "parrafo": "Proyectos de investigación académica en los que participa el equipo del centro.",
+    "notaInterna": "3M y GrTE (David, 5-nov). GrTE aquí es solo descripción; el acceso de Inicio va a la plataforma."
+  }
+]
