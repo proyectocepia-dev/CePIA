@@ -109,7 +109,11 @@ def desplegar(ob):
         bpy.ops.object.mode_set(mode="OBJECT")
 
 
+import math
 for ob in objs.values():
+    # Sombreado suave con cantos vivos sobre 35 grados: superficies curvas sin facetas, aristas nítidas.
+    ob.data.shade_smooth()
+    ob.data.set_sharpness_by_angle(angle=math.radians(35))
     desplegar(ob)
     print("uv", ob.name)
 
@@ -171,8 +175,9 @@ def material_procedural(nombre, panel):
     nt.links.new(corte_r.outputs["Result"], corte.inputs[1])
 
     if panel:
-        base, sucio, gastado = (0.42, 0.44, 0.46, 1), (0.16, 0.15, 0.14, 1), (0.62, 0.63, 0.64, 1)
-        rug_base, rug_sucio, metal = 0.3, 0.75, 0.85
+        # Paneles del plato: aluminio prístino (casi sin suciedad ni desgaste), muy pulido.
+        base, sucio, gastado = (0.8, 0.82, 0.84, 1), (0.72, 0.74, 0.76, 1), (0.86, 0.87, 0.88, 1)
+        rug_base, rug_sucio, metal = 0.1, 0.2, 1.0
     else:
         base, sucio, gastado = (0.055, 0.062, 0.07, 1), (0.02, 0.018, 0.016, 1), (0.36, 0.35, 0.33, 1)
         rug_base, rug_sucio, metal = 0.48, 0.85, 0.55
@@ -301,11 +306,10 @@ for name, ob in objs.items():
     orm.pixels.foreach_set(o.ravel())
     print("bake", name, tam)
 
-    final = material_final(f"LCT_{name}", im_color, orm)
+    # Dos materiales con las mismas texturas: la web reconoce "LCT_Panel" y le da acabado reflectante.
     ob.data.materials.clear()
-    ob.data.materials.append(final)
-    for p in ob.data.polygons:
-        p.material_index = 0
+    ob.data.materials.append(material_final(f"LCT_{name}", im_color, orm))
+    ob.data.materials.append(material_final(f"LCT_Panel_{name}", im_color, orm))
 
 objs["Azimuth"].matrix_world = piv["Azimuth"]
 objs["Elevation"].parent = objs["Azimuth"]

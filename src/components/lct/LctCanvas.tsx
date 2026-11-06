@@ -14,6 +14,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
+import { toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LCT_COLORES, LCT_ESCENA, LCT_MODELO } from './lct-config';
@@ -67,6 +68,26 @@ function Puntero({ movimiento }: { movimiento: boolean }) {
   return null;
 }
 
+/**
+ * Paneles del plato en aluminio prístino. El GLB trae un solo material por pieza, pero los paneles se hornearon
+ * en gris claro y la estructura en grafito: la luminancia del color base los separa. Donde es panel, el shader
+ * baja la rugosidad, sube el metálico y limpia el color, así refleja el estudio como un plato pulido.
+ */
+function pulirPaneles(shader: { fragmentShader: string; uniforms: Record<string, THREE.IUniform> }) {
+  const a = LCT_ESCENA.acabado;
+  shader.uniforms.uPanelUmbral = { value: new THREE.Vector2(a.umbral[0], a.umbral[1]) };
+  shader.uniforms.uPanelColor = { value: new THREE.Color(LCT_COLORES.panelPulido) };
+  shader.uniforms.uPanelRugosidad = { value: a.rugosidadPanel };
+  shader.fragmentShader = shader.fragmentShader
+    .replace('void main() {', 'uniform vec2 uPanelUmbral;\nuniform vec3 uPanelColor;\nuniform float uPanelRugosidad;\nvoid main() {')
+    .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+      float lctLum = dot(diffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+      float lctPanel = smoothstep(uPanelUmbral.x, uPanelUmbral.y, lctLum);
+      diffuseColor.rgb = mix(diffuseColor.rgb, uPanelColor, lctPanel * 0.75);
+      roughnessFactor = mix(roughnessFactor, uPanelRugosidad, lctPanel);
+      metalnessFactor = mix(metalnessFactor, 1.0, lctPanel);`);
+}
+
 /** Reflejos suaves para el metal: un estudio generado en la GPU (sin descargar HDR). */
 function Entorno() {
   const { gl, scene } = useThree();
@@ -110,9 +131,17 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
         const original = (Array.isArray(m.material) ? m.material[0] : m.material) as THREE.MeshStandardMaterial;
         m.userData.materialOriginal ??= original?.name ?? '';
         if (original?.map) {
-          // GLB con texturas horneadas (pintura gastada, suciedad, oclusión): se usa tal cual, por ambas caras.
+          // GLB con texturas horneadas (pintura gastada, suciedad, oclusión): se usa por ambas caras, con
+          // normales suavizadas (cantos vivos sobre 35°) y paneles del plato en aluminio prístino.
+          if (!m.userData.suavizado) {
+            m.geometry = toCreasedNormals(m.geometry, deg(LCT_ESCENA.acabado.anguloCanto));
+            m.userData.suavizado = true;
+          }
           original.side = THREE.DoubleSide;
           original.envMapIntensity = LCT_ESCENA.luz.reflejoTexturas;
+          original.onBeforeCompile = pulirPaneles;
+          original.customProgramCacheKey = () => 'lct-paneles';
+          original.needsUpdate = true;
         } else {
           m.material = m.userData.materialOriginal === 'Material.002' ? materiales.plato : materiales.estructura;
         }
@@ -254,7 +283,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
   return (
     <Canvas
       frameloop={!activo ? 'never' : movimiento ? 'always' : 'demand'}
-      dpr={[1, 1.75]}
+      dpr={[1, 2]}
       gl={{ antialias: true, alpha: true, powerPreference: 'default' }}
       camera={{ fov: LCT_ESCENA.fov, near: 0.5, far: 300, position: [0, LCT_ESCENA.inicio.alto, LCT_ESCENA.inicio.dist] }}
     >
