@@ -1,0 +1,15 @@
+[
+  { "id": "observatorios", "nombre": "Observatorios", "bloque": "empresas" },
+  { "id": "industria-forestal", "nombre": "Industria forestal", "bloque": "empresas" },
+  { "id": "expocorma", "nombre": "ExpoCorma", "bloque": "empresas" },
+  { "id": "educacion-media", "nombre": "Liceos y educación media", "bloque": "educacion" },
+  { "id": "inacap", "nombre": "INACAP", "bloque": "educacion" },
+  { "id": "ceat", "nombre": "CEAT", "bloque": "educacion" },
+  { "id": "ufro", "nombre": "UFRO", "bloque": "id" },
+  { "id": "vtt", "nombre": "VTT", "bloque": "id" },
+  { "id": "shnu", "nombre": "ShNU", "bloque": "id" },
+  { "id": "jpl", "nombre": "JPL", "bloque": "id" },
+  { "id": "nrao", "nombre": "NRAO", "bloque": "id" },
+  { "id": "u-austral", "nombre": "U. Austral", "bloque": "id" },
+  { "id": "chain", "nombre": "ChAIN", "bloque": "id" }
+]

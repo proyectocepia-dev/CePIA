@@ -1,0 +1,6 @@
+[
+  {"id": "rodrigo-reeves", "nombre": "Dr. Rodrigo Reeves", "rol": "Director", "orden": 1},
+  {"id": "brian-andler", "nombre": "Brian Andler", "rol": "Ingeniero civil electrónico", "orden": 10, "editorial": "oculto"},
+  {"id": "cristian-calquin", "nombre": "Cristian Calquin", "rol": "Ingeniero electrónico", "orden": 10, "editorial": "oculto"},
+  {"id": "patricio-alarcon", "nombre": "Patricio Alarcón", "rol": "Ingeniero electrónico", "orden": 10, "editorial": "oculto"}
+]
