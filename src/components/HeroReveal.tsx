@@ -1,7 +1,7 @@
 'use client';
 // Portada compacta (T1.18): en la primera vista el menú queda retraído (solo logo, co-marca y GrTE).
-// Se despliega apenas hay scroll (cualquier movimiento) y no se vuelve a retraer al subir: solo se retrae
-// si la página está de vuelta arriba y pasan ~5 s sin scroll ni el puntero sobre el header.
+// Se despliega con cualquier movimiento (scroll, mouse, toque o teclado) y no se vuelve a retraer al subir:
+// solo se retrae si la página está arriba y pasan ~5 s sin movimiento ni el puntero sobre el header.
 // Marca <html data-menu="retraido|visible">; el CSS hace el fundido. Con teclado, el foco dentro del
 // menú lo muestra igual (ver site.css), así que nunca queda inaccesible.
 import { useEffect } from 'react';
@@ -22,7 +22,7 @@ export default function HeroReveal() {
         if (window.scrollY <= ARRIBA_PX && !sobreHeader) raiz.dataset.menu = 'retraido';
       }, ESPERA_MS);
     };
-    const alScroll = () => {
+    const alMover = () => {
       mostrar();
       if (window.scrollY <= ARRIBA_PX) programarRetraer();
       else window.clearTimeout(reloj);
@@ -32,16 +32,20 @@ export default function HeroReveal() {
     const salir = () => { sobreHeader = false; if (window.scrollY <= ARRIBA_PX) programarRetraer(); };
 
     raiz.dataset.menu = window.scrollY > ARRIBA_PX ? 'visible' : 'retraido';
-    window.addEventListener('scroll', alScroll, { passive: true });
-    window.addEventListener('wheel', alScroll, { passive: true });
-    window.addEventListener('touchmove', alScroll, { passive: true });
+    window.addEventListener('scroll', alMover, { passive: true });
+    window.addEventListener('wheel', alMover, { passive: true });
+    window.addEventListener('touchmove', alMover, { passive: true });
+    window.addEventListener('pointermove', alMover, { passive: true });
+    window.addEventListener('keydown', alMover);
     header?.addEventListener('pointerenter', entrar);
     header?.addEventListener('pointerleave', salir);
     return () => {
       window.clearTimeout(reloj);
-      window.removeEventListener('scroll', alScroll);
-      window.removeEventListener('wheel', alScroll);
-      window.removeEventListener('touchmove', alScroll);
+      window.removeEventListener('scroll', alMover);
+      window.removeEventListener('wheel', alMover);
+      window.removeEventListener('touchmove', alMover);
+      window.removeEventListener('pointermove', alMover);
+      window.removeEventListener('keydown', alMover);
       header?.removeEventListener('pointerenter', entrar);
       header?.removeEventListener('pointerleave', salir);
       delete raiz.dataset.menu;
