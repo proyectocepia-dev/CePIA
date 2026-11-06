@@ -691,3 +691,27 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
 .lct-stage__canvas { pointer-events: auto; touch-action: pan-y; cursor: grab; }
 .lct-stage__canvas canvas[data-arrastrando] { cursor: grabbing; }
 @media (min-width: 960px) { .hero__stage { pointer-events: none; } .lct-stage__canvas { pointer-events: auto; } }
+
+/* Hero: las lecturas (Sede, Sitio, Plato, Bandas) quedan por sobre el lienzo del LCT y su suelo, con un velo
+   nocturno propio para leerse siempre; el modelo sigue detrás sin recibir el texto encima. */
+.hero .readout { position: relative; z-index: 2; pointer-events: none;
+  background: linear-gradient(180deg, rgba(6,13,20,.0) 0%, rgba(6,13,20,.72) 38%, rgba(6,13,20,.86) 100%); }
+.hero .readout > div { padding-top: var(--space-5); }
+
+/* Indicación sutil de que el LCT se puede girar: órbita punteada + texto, ≥15 px, baja opacidad.
+   Aparece cuando el modelo está listo y se apaga tras el primer arrastre. */
+.lct-stage__girar { position: absolute; z-index: 1; left: 50%; bottom: var(--space-3); translate: -50% 0; margin: 0;
+  display: inline-flex; align-items: center; gap: var(--space-2); padding: 3px var(--space-3);
+  font-family: var(--font-semi); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .02em; color: var(--readout);
+  background: rgba(6, 13, 20, .55); border: 1px solid var(--line); pointer-events: none;
+  opacity: 0; transition: opacity .6s var(--motion-ease-out); }
+.lct-stage[data-estado="listo"] .lct-stage__girar { opacity: .82; transition-delay: 2.2s; }
+.lct-stage:has(canvas[data-arrastrando]) .lct-stage__girar, .lct-stage[data-girado] .lct-stage__girar { opacity: 0; transition-delay: 0s; }
+@media (prefers-reduced-motion: no-preference) {
+  .lct-stage[data-estado="listo"]:not([data-girado]) .lct-stage__girar svg { animation: lct-orbita 3.2s ease-in-out 3s infinite; }
+}
+@keyframes lct-orbita { 0%, 70%, 100% { transform: none; } 35% { transform: translateX(3px); } }
+@media (min-width: 960px) { .lct-stage__girar { left: auto; right: var(--borde); translate: none; bottom: calc(var(--space-9) + var(--space-7) + 124px); } }
+@media (max-width: 959px) { .lct-stage__girar { top: calc(var(--space-6) + var(--space-2)); bottom: auto; left: auto; right: 0; translate: none; } }
+.lct-stage__girar .solo-tactil { display: none; }
+@media (hover: none) and (pointer: coarse) { .lct-stage__girar .solo-tactil { display: inline; } .lct-stage__girar .solo-puntero { display: none; } }
