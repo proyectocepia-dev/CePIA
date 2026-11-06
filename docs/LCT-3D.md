@@ -60,3 +60,22 @@ Fuentes: [AgX en three.js (issue #27362)](https://github.com/mrdoob/three.js/iss
 - Escritorio: la escena ocupa todo el hero y el telescopio queda al centro-derecha con `filmOffset`
   (`encuadre`), dejando el título legible a la izquierda. Móvil: el escenario va bajo los botones, a todo el ancho.
 - Móvil: el telescopio y la cámara siguen el giroscopio; en iPhone el permiso se pide al primer toque.
+
+## Versión cinematográfica (6-nov, noche)
+- **Plato espejo** (`plato-espejo.ts`): el plato Leighton original (operó en Maunakea como Caltech Submillimeter
+  Observatory, bajo una cúpula geodésica plateada) es un reflector de 10,4 m de paneles hexagonales muy precisos.
+  Aquí es aluminio casi espejo (rugosidad 0,05 + barniz) en paneles hexagonales de ~1 m calculados en el shader:
+  cada panel apenas desalineado rompe el reflejo en facetas, con juntas finas.
+- **Reflejos** (`entorno-noche.ts`): el espejo refleja un cielo nocturno de altiplano pintado en un canvas
+  (gradiente, Vía Láctea, estrellas, valle oscuro) convertido a PMREM; sin descargar HDR.
+- **Vista** 3/4 con cámara algo elevada: plato al centro, estructura legible. El scroll rodea el telescopio hasta
+  verlo de costado mientras el plato sube al cenit.
+- **Inspección libre**: arrastrar sobre el telescopio gira la cámara (360° en horizontal, acotado en vertical) y
+  vuelve sola al encuadre tras 6 s. En táctil, solo el arrastre horizontal (el vertical sigue siendo scroll).
+- **Fondo**: horizonte bajo en el cuadro, dos cordilleras (la lejana más clara por la niebla) y textura sutil de
+  ripio en el valle.
+- **Acabado de cine** (`Posproceso.tsx`): curva S de contraste, viñeta y grano fino después del tone mapping.
+
+Fuentes: [Caltech, el LCT en Maunakea](https://calteches.library.caltech.edu/606/2/Life.pdf),
+[Space Daily: el telescopio se desarma para Chile](https://www.spacedaily.com/reports/Telescope_Dismantled_and_Heading_to_New_Mission_in_Chile_999.html),
+[NOIRLab: CSO](https://noirlab.edu/public/images/Keck-Matsopoulos_9-CC).

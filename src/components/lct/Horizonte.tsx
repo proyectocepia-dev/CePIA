@@ -57,20 +57,62 @@ function texturaSuelo(): THREE.CanvasTexture {
   return new THREE.CanvasTexture(c);
 }
 
+/** Textura sutil del valle: grano de arena, piedras y manchas de ripio, en escala de grises (se tiñe con el color). */
+function texturaValle(): THREE.CanvasTexture {
+  const n = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = n;
+  const ctx = c.getContext('2d');
+  if (ctx) {
+    ctx.fillStyle = '#b8b8b8';
+    ctx.fillRect(0, 0, n, n);
+    let s = 7;
+    const r = () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+    for (let i = 0; i < 220; i++) {         // manchas de ripio
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      const v = Math.floor(150 + r() * 80);
+      g.addColorStop(0, `rgba(${v},${v},${v},0.5)`);
+      g.addColorStop(1, `rgba(${v},${v},${v},0)`);
+      ctx.save();
+      ctx.translate(r() * n, r() * n);
+      ctx.scale(10 + r() * 60, 6 + r() * 30);
+      ctx.fillStyle = g;
+      ctx.fillRect(-1, -1, 2, 2);
+      ctx.restore();
+    }
+    for (let i = 0; i < 9000; i++) {        // grano y piedras pequeñas
+      const v = Math.floor(120 + r() * 135);
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      ctx.fillRect(r() * n, r() * n, r() < 0.04 ? 2 : 1, 1);
+    }
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(70, 70);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
 export default function Horizonte() {
   const { scene } = useThree();
   const h = LCT_ESCENA.horizonte;
 
   const piezas = useMemo(() => {
     const alfa = texturaSuelo();
+    const valle = texturaValle();
     return {
       alfa,
+      valle,
       // Sin iluminar: de noche el llano y los cerros son siluetas; así no los aclaran las luces del telescopio.
-      suelo: new THREE.MeshBasicMaterial({ color: LCT_COLORES.suelo2, alphaMap: alfa, transparent: true, depthWrite: false }),
+      suelo: new THREE.MeshBasicMaterial({ color: LCT_COLORES.suelo2, map: valle, alphaMap: alfa, transparent: true, depthWrite: false }),
       cerros: new THREE.MeshBasicMaterial({ color: LCT_COLORES.cerros, side: THREE.DoubleSide }),
       // La sombra del telescopio sobre el suelo, en una capa aparte (solo oscurece donde hay sombra).
       sombra: new THREE.ShadowMaterial({ opacity: 0.55, transparent: true, depthWrite: false }),
       geo: geometriaCerros(h.radio, h.altoCerros, h.base),
+      // Segunda cordillera, más lejana y alta: la niebla la aclara y da profundidad.
+      geoLejos: geometriaCerros(h.radio * 1.9, h.altoCerros * 1.5, h.base),
+      cerrosLejos: new THREE.MeshBasicMaterial({ color: LCT_COLORES.cerrosLejos, side: THREE.DoubleSide }),
     };
   }, [h.radio, h.altoCerros, h.base]);
 
@@ -84,6 +126,9 @@ export default function Horizonte() {
       piezas.cerros.dispose();
       piezas.sombra.dispose();
       piezas.geo.dispose();
+      piezas.geoLejos.dispose();
+      piezas.cerrosLejos.dispose();
+      piezas.valle.dispose();
     };
   }, [scene, piezas, h.niebla]);
 
@@ -95,6 +140,7 @@ export default function Horizonte() {
       <mesh rotation-x={-Math.PI / 2} position-y={h.base + 0.01} material={piezas.sombra} receiveShadow renderOrder={-1}>
         <circleGeometry args={[30, 64]} />
       </mesh>
+      <mesh geometry={piezas.geoLejos} material={piezas.cerrosLejos} renderOrder={-3} rotation-y={0.7} />
       <mesh geometry={piezas.geo} material={piezas.cerros} renderOrder={-2} />
     </group>
   );

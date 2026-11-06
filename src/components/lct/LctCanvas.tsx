@@ -13,12 +13,13 @@ import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
-import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LCT_COLORES, LCT_ESCENA, LCT_MODELO } from './lct-config';
 import Posproceso from './Posproceso';
 import Horizonte from './Horizonte';
+import { texturaCieloNocturno } from './entorno-noche';
+import { crearPlatoEspejo } from './plato-espejo';
 
 gsap.registerPlugin(ScrollTrigger);
 const deg = THREE.MathUtils.degToRad;
@@ -76,12 +77,14 @@ function Puntero({ movimiento }: { movimiento: boolean }) {
   return null;
 }
 
-/** Reflejos suaves para el metal: un estudio generado en la GPU (sin descargar HDR). */
+/** Reflejos: el cielo nocturno del altiplano (entorno-noche.ts) como mapa PMREM; el plato espejo lo refleja. */
 function Entorno() {
   const { gl, scene } = useThree();
   useEffect(() => {
     const pmrem = new THREE.PMREMGenerator(gl);
-    const env = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    const cielo = texturaCieloNocturno();
+    const env = pmrem.fromEquirectangular(cielo).texture;
+    cielo.dispose();
     scene.environment = env;
     scene.environmentIntensity = LCT_ESCENA.luz.entorno;
     return () => { scene.environment = null; env.dispose(); pmrem.dispose(); };
@@ -102,17 +105,12 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
 
   const materiales = useMemo(() => {
     const pulidos: THREE.Material[] = [];
-    const a = LCT_ESCENA.acabado;
     return {
       estructura: new THREE.MeshStandardMaterial({ color: LCT_COLORES.estructura, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide }),
       plato: new THREE.MeshStandardMaterial({ color: LCT_COLORES.plato, metalness: 0.7, roughness: 0.28, side: THREE.DoubleSide }),
-      /** Aluminio pulido con capa de barniz: reflejos nítidos del estudio, borde de luz limpio. */
+      /** Plato casi espejo en paneles hexagonales (plato-espejo.ts). */
       platoPulido: (aoMap: THREE.Texture | null) => {
-        const mat = new THREE.MeshPhysicalMaterial({
-          color: LCT_COLORES.panelPulido, metalness: 1, roughness: a.rugosidadPanel, aoMap, aoMapIntensity: 0.8,
-          clearcoat: a.barniz, clearcoatRoughness: 0.06, envMapIntensity: a.reflejoPanel,
-          side: THREE.DoubleSide, shadowSide: THREE.FrontSide,
-        });
+        const mat = crearPlatoEspejo(aoMap);
         pulidos.push(mat);
         return mat;
       },
@@ -136,7 +134,7 @@ function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
         const original = (Array.isArray(m.material) ? m.material[0] : m.material) as THREE.MeshStandardMaterial;
         m.userData.materialOriginal ??= original?.name ?? '';
         if (m.userData.materialOriginal.startsWith('LCT_Panel')) {
-          // Plato: aluminio prístino y pulido. Del horneado solo se usa la oclusión (canal R del ORM).
+          // Plato: espejo de paneles hexagonales. Del horneado solo se usa la oclusión (canal R del ORM).
           m.material = materiales.platoPulido(original.aoMap);
         } else if (original?.map) {
           // Estructura con texturas horneadas (pintura gastada, suciedad, oclusión). El GLB ya trae normales
@@ -240,6 +238,56 @@ function Anillo({ pose }: { pose: Pose }) {
   );
 }
 
+/**
+ * Inspección libre: arrastrar sobre el lienzo gira la cámara alrededor del telescopio (giro completo en horizontal,
+ * acotado en vertical). Tras unos segundos sin tocar, vuelve con suavidad al encuadre de la escena.
+ * En táctil solo el arrastre horizontal gira; el vertical sigue siendo scroll de la página (touch-action: pan-y).
+ */
+const inspeccion = { yaw: 0, pitch: 0, metaYaw: 0, metaPitch: 0, ultimo: -Infinity };
+
+function Inspeccion({ movimiento }: { movimiento: boolean }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    if (!movimiento) return;
+    const el = gl.domElement;
+    let activo = false;
+    let x0 = 0;
+    let y0 = 0;
+    const lim = LCT_ESCENA.inspeccion;
+    const bajar = (e: PointerEvent) => {
+      activo = true; x0 = e.clientX; y0 = e.clientY;
+      el.setPointerCapture(e.pointerId);
+      el.dataset.arrastrando = 'si';
+    };
+    const mover = (e: PointerEvent) => {
+      if (!activo) return;
+      inspeccion.metaYaw += (e.clientX - x0) * lim.velocidad;
+      if (e.pointerType !== 'touch') {
+        inspeccion.metaPitch = THREE.MathUtils.clamp(inspeccion.metaPitch + (e.clientY - y0) * lim.velocidad * 0.7, -lim.pitch, lim.pitch);
+      }
+      x0 = e.clientX; y0 = e.clientY;
+      inspeccion.ultimo = performance.now();
+    };
+    const soltar = (e: PointerEvent) => {
+      activo = false;
+      if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId);
+      delete el.dataset.arrastrando;
+      inspeccion.ultimo = performance.now();
+    };
+    el.addEventListener('pointerdown', bajar);
+    el.addEventListener('pointermove', mover);
+    el.addEventListener('pointerup', soltar);
+    el.addEventListener('pointercancel', soltar);
+    return () => {
+      el.removeEventListener('pointerdown', bajar);
+      el.removeEventListener('pointermove', mover);
+      el.removeEventListener('pointerup', soltar);
+      el.removeEventListener('pointercancel', soltar);
+    };
+  }, [gl, movimiento]);
+  return null;
+}
+
 function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
   const { camera, size } = useThree();
   const mirar = useMemo(() => new THREE.Vector3(...LCT_ESCENA.objetivo), []);
@@ -247,9 +295,16 @@ function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
   useFrame((_, dt) => {
     const sens = LCT_ESCENA.sensibilidad;
     if (movimiento) suave.current.lerp(puntero, Math.min(1, dt * sens.inercia * 0.6));
-    const a = mezclar(pose, 'orbita') + suave.current.x * deg(sens.orbita);
-    const h = mezclar(pose, 'alto') + suave.current.y * sens.alto;
+    // Inspección: tras un rato sin arrastrar, la meta vuelve a cero y la cámara regresa al encuadre.
+    if (performance.now() - inspeccion.ultimo > LCT_ESCENA.inspeccion.retorno * 1000) {
+      inspeccion.metaYaw = THREE.MathUtils.damp(inspeccion.metaYaw, 0, 0.8, dt);
+      inspeccion.metaPitch = THREE.MathUtils.damp(inspeccion.metaPitch, 0, 0.8, dt);
+    }
+    inspeccion.yaw = THREE.MathUtils.damp(inspeccion.yaw, inspeccion.metaYaw, 6, dt);
+    inspeccion.pitch = THREE.MathUtils.damp(inspeccion.pitch, inspeccion.metaPitch, 6, dt);
+    const a = mezclar(pose, 'orbita') + suave.current.x * deg(sens.orbita) + inspeccion.yaw;
     const d = mezclar(pose, 'dist');
+    const h = mezclar(pose, 'alto') + suave.current.y * sens.alto + inspeccion.pitch * d;
     camera.position.set(Math.sin(a) * d, h, Math.cos(a) * d);
     camera.lookAt(mirar);
     // Encuadre: en escritorio el telescopio se corre a la derecha (aire para el título) y la vista sube para que
@@ -319,7 +374,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
       />
       <directionalLight position={[14, 10, -16]} intensity={l.borde} color={LCT_COLORES.borde} />
       <directionalLight position={[-16, 4, -12]} intensity={l.bordeCalido} color={LCT_COLORES.bordeCalido} />
-      <spotLight position={[4, 46, 34]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
+      <spotLight position={[8, 22, 42]} angle={0.32} penumbra={0.9} intensity={l.frente} distance={90} decay={0} color={LCT_COLORES.clave} />
       <Puntero movimiento={movimiento} />
       <Entorno />
       <Suspense fallback={null}>
@@ -329,6 +384,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
         <Coreografia pose={pose} movimiento={movimiento} />
       </Suspense>
       <Camara pose={pose} movimiento={movimiento} />
+      <Inspeccion movimiento={movimiento} />
       <Posproceso />
     </Canvas>
   );

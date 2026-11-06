@@ -685,3 +685,9 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
   .lct-stage__canvas { -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent);
                                mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent); }
 }
+
+/* Inspección: el lienzo del LCT recibe el arrastre (el texto y los botones siguen encima). En táctil el gesto
+   vertical sigue siendo scroll de la página. */
+.lct-stage__canvas { pointer-events: auto; touch-action: pan-y; cursor: grab; }
+.lct-stage__canvas canvas[data-arrastrando] { cursor: grabbing; }
+@media (min-width: 960px) { .hero__stage { pointer-events: none; } .lct-stage__canvas { pointer-events: auto; } }

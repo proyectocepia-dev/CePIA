@@ -16,8 +16,9 @@ export const LCT_COLORES = {
   anillo: '#F4F1EA',      // text-on-dark: el anillo es luz, no un color de marca
   halo: '#9FE6E3',
   suelo2: '#24211E',      // altiplano de noche (arena oscura)
-  cerros: '#0B121A',      // silueta de los cerros
-  nieblaHorizonte: '#0E1924', // color del cielo CSS en el horizonte: funde los cerros lejanos
+  cerros: '#0B121A',
+  cerrosLejos: '#122230', // cordillera lejana, algo más clara      // silueta de los cerros
+  nieblaHorizonte: '#132332', // color del cielo CSS en el horizonte: funde los cerros lejanos
   panelPulido: '#DDE2E6', // aluminio limpio de los paneles del plato (lunar-100 algo más frío)
 } as const;
 
@@ -35,8 +36,11 @@ type Escena = {
   /** Respuesta al puntero (o a la inclinación del teléfono): grados de giro del telescopio y de la cámara,
    *  metros de alto de cámara e inercia (más alto = sigue más rápido). */
   sensibilidad: { az: number; el: number; orbita: number; alto: number; inercia: number };
-  /** Acabado del plato pulido: rugosidad, barniz (clearcoat) e intensidad de reflejos del estudio. */
-  acabado: { rugosidadPanel: number; barniz: number; reflejoPanel: number };
+  /** Plato espejo: rugosidad, barniz (clearcoat), intensidad de reflejos, tamaño del panel hexagonal (m),
+   *  ancho de la junta (fracción del panel) y desalineación de cada panel (facetas en el reflejo). */
+  acabado: { rugosidadPanel: number; barniz: number; reflejoPanel: number; panelHex: number; junta: number; faceta: number };
+  /** Arrastre para inspeccionar: radianes por píxel, tope vertical (rad), segundos hasta volver al encuadre. */
+  inspeccion: { velocidad: number; pitch: number; retorno: number };
   /** Rango de inclinación del plato desde el cenit (grados): -40 = 50° de elevación, el mínimo sin cruzarse
    *  con la montura en este modelo; -2 = casi cenit. */
   limiteEl: [number, number];
@@ -45,6 +49,8 @@ type Escena = {
   encuadre: { escritorio: { x: number; y: number }; movil: { x: number; y: number } };
   /** Llano de noche: radio de los cerros (m), su alto máximo, cota del suelo y tramo de niebla [cerca, lejos]. */
   horizonte: { radio: number; altoCerros: number; base: number; niebla: [number, number] };
+  /** Acabado de cine (después del tone mapping): mezcla con curva S, oscurecido de viñeta y amplitud de grano. */
+  cine: { contraste: number; vineta: number; grano: number };
   /** Exposición del tone mapping AgX. */
   exposicion: number;
   /** Bloom (UnrealBloomPass): solo lo que supera `umbral` (anillo y brillos especulares) florece. */
@@ -57,29 +63,31 @@ type Escena = {
 };
 
 export const LCT_ESCENA: Escena = {
-  fov: 34,
-  objetivo: [0, 8, 0],
+  fov: 30,
+  objetivo: [0, 6.4, 0],
   anillo: {
     centro: [0, 8.6, 0], radio: 6.2, atras: 4.5,
     capas: [
-      { ancho: 0.32, opacidad: 0.32, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
-      { ancho: 0.11, opacidad: 0.6, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
+      { ancho: 0.32, opacidad: 0.2, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
+      { ancho: 0.11, opacidad: 0.42, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
       { ancho: 0.045, opacidad: 0.75, color: LCT_COLORES.anillo }, // núcleo, suave pero legible
     ],
   },
   lectura: { azCero: 270 },
   luz: { hemisferio: 0.55, clave: 2.6, borde: 7.5, bordeCalido: 3.2, frente: 2.4, entorno: 0.7, reflejoTexturas: 1.5 },
   sensibilidad: { az: 16, el: 7, orbita: 7, alto: 1.4, inercia: 3.2 },
-  acabado: { rugosidadPanel: 0.16, barniz: 0.5, reflejoPanel: 1.4 },
+  acabado: { rugosidadPanel: 0.05, barniz: 0.6, reflejoPanel: 1.35, panelHex: 1.05, junta: 0.035, faceta: 0.05 },
+  inspeccion: { velocidad: 0.006, pitch: 0.35, retorno: 6 },
   limiteEl: [-40, -2],
-  encuadre: { escritorio: { x: -0.14, y: -0.12 }, movil: { x: 0, y: -0.06 } },
-  horizonte: { radio: 340, altoCerros: 30, base: -0.36, niebla: [25, 420] },
-  exposicion: 0.95,
+  encuadre: { escritorio: { x: -0.12, y: -0.05 }, movil: { x: 0, y: -0.03 } },
+  horizonte: { radio: 420, altoCerros: 26, base: -0.36, niebla: [30, 700] },
+  cine: { contraste: 0.35, vineta: 0.45, grano: 0.022 },
+  exposicion: 1.05,
   bloom: { fuerza: 0.32, radio: 0.5, umbral: 0.92 },
   sombra: { mapa: 2048, suavidad: 4 },
-  // Cámara elevada mirando al plato (que trabaja hacia el cenit), con el encuadre corrido hacia arriba para que
-  // se vea el horizonte del llano. El scroll lleva el plato al cenit y la cámara sube a vista casi cenital.
-  inicio: { az: 60, el: 0, dist: 70, alto: 30, orbita: 0 },
-  reposo: { az: -10, el: -36, dist: 44, alto: 15, orbita: 0 },
-  salida: { az: 15, el: -6, dist: 24, alto: 48, orbita: 20 },
+  // Vista 3/4 con la cámara algo elevada: el plato (que trabaja hacia el cenit) queda al centro y casi de frente,
+  // girado lo justo para leer la estructura. El scroll rodea el telescopio hasta verlo de costado y sube el plato.
+  inicio: { az: 120, el: 0, dist: 72, alto: 28, orbita: -40 },
+  reposo: { az: -2, el: -34, dist: 40, alto: 11, orbita: 30 },
+  salida: { az: 70, el: -8, dist: 34, alto: 15, orbita: 115 },
 };
