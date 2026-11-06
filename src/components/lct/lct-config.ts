@@ -22,7 +22,10 @@ type PoseEscena = { az: number; el: number; dist: number; alto: number; orbita: 
 type Escena = {
   fov: number;
   objetivo: [number, number, number];
-  anillo: { centro: [number, number, number]; radio: number; grosor: number; atras: number };
+  /** Capas del anillo desenfocado: `ancho` = mitad del espesor del brillo (fracción del radio de la textura). */
+  anillo: { centro: [number, number, number]; radio: number; atras: number; capas: Array<{ ancho: number; opacidad: number; color: string }> };
+  /** azCero: lectura de brújula cuando la pose az es 0 (solo para la ficha; el modelo no tiene norte real). */
+  lectura: { azCero: number };
   luz: { hemisferio: number; clave: number; borde: number; bordeCalido: number; entorno: number };
   inicio: PoseEscena;
   reposo: PoseEscena;
@@ -32,7 +35,15 @@ type Escena = {
 export const LCT_ESCENA: Escena = {
   fov: 28,
   objetivo: [0, 5.2, 0],
-  anillo: { centro: [0, 7.8, 0], radio: 5.8, grosor: 0.045, atras: 4.5 },
+  anillo: {
+    centro: [0, 7.8, 0], radio: 5.8, atras: 4.5,
+    capas: [
+      { ancho: 0.28, opacidad: 0.2, color: LCT_COLORES.halo },      // resplandor ancho, muy tenue
+      { ancho: 0.11, opacidad: 0.45, color: LCT_COLORES.anillo },  // cuerpo del anillo, fuera de foco
+      { ancho: 0.045, opacidad: 0.55, color: LCT_COLORES.anillo }, // núcleo, suave pero legible
+    ],
+  },
+  lectura: { azCero: 270 },
   luz: { hemisferio: 0.35, clave: 1.4, borde: 5.5, bordeCalido: 2.2, entorno: 0.45 },
   inicio: { az: -130, el: 0, dist: 64, alto: 14, orbita: 18 },
   reposo: { az: -45, el: -42, dist: 40, alto: 6.5, orbita: 30 },

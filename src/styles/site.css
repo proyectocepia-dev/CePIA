@@ -482,15 +482,43 @@ body { overscroll-behavior-y: none; }
 }
 
 /* ---------- Capa inmersiva · LCT 3D en la portada ---------- */
-/* Pieza de museo: el telescopio en metal oscuro delante de un anillo de luz, más grande que el visor y sin
-   máscara. El lienzo desborda el escenario (el hero recorta) y queda por detrás del texto; el velo de
-   .hero__copy::before mantiene el contraste del título y los botones. La foto del visor es el respaldo. */
+/* Lámina técnica, en clave brutalista: el telescopio en metal oscuro delante de un anillo de luz fuera de foco,
+   enmarcado con marcas de corte, rótulo de figura y una ficha de datos de bordes duros (sin radios ni sombras).
+   El lienzo desborda el escenario (el hero recorta) y queda por detrás del texto; el velo de .hero__copy::before
+   mantiene el contraste del título y los botones. */
 .hero__copy { z-index: 1; }
 .hero__stage { position: relative; z-index: 0; }
-.lct-stage { position: relative; }
+.lct-stage { position: relative; margin: 0; aspect-ratio: 1; }
 .lct-stage__canvas { position: absolute; inset: -22% -26% -30% -26%; pointer-events: none; opacity: 0; transition: opacity 1.4s var(--motion-ease-out); }
 @media (min-width: 960px) { .lct-stage__canvas { inset: -42% -58% -52% -46%; } }
 .lct-stage__canvas canvas { display: block; }
-.lct-stage .reticle { transition: opacity 1.2s var(--motion-ease-out); }
 .lct-stage[data-estado="listo"] .lct-stage__canvas { opacity: 1; }
-.lct-stage[data-estado="listo"] .reticle { opacity: 0; }
+
+/* Marcas de corte en las esquinas del escenario: dos "L" de 1 px. */
+.lct-stage__marca { position: absolute; width: 28px; height: 28px; pointer-events: none; border-color: var(--line-strong); border-style: solid; border-width: 0; }
+.lct-stage__marca--a { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+.lct-stage__marca--b { right: 0; bottom: 0; border-right-width: 1px; border-bottom-width: 1px; }
+
+/* Rótulo de figura y aviso de carga: versalitas técnicas, ≥15 px. */
+.lct-stage__fig, .lct-stage__carga { position: absolute; margin: 0; font-family: var(--font-semi); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-on-dark-muted); text-shadow: none; }
+.lct-stage__fig { top: 0; left: 40px; z-index: 1; transform: translateY(-50%); padding: 2px var(--space-2); background: rgba(6, 13, 20, .78); }
+.lct-stage__carga { top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--readout); transition: opacity .4s ease-out; }
+.lct-stage[data-estado="listo"] .lct-stage__carga, .lct-stage[data-estado="sin-3d"] .lct-stage__carga { opacity: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .lct-stage[data-estado="cargando"] .lct-stage__carga { animation: lct-parpadeo 1.2s steps(2, jump-none) infinite; }
+}
+@keyframes lct-parpadeo { 50% { opacity: .35; } }
+
+/* Ficha de datos: bloque duro, alineado al borde inferior derecho; azimut y elevación vienen de la escena. */
+.lct-stage__ficha { position: absolute; right: 0; bottom: 0; z-index: 1; display: grid; min-width: min(100%, 340px);
+  background: rgba(6, 13, 20, .78); border: 1px solid var(--line-strong); text-shadow: none; }
+.lct-stage__nombre { padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--line-strong);
+  font-family: var(--font-semi); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--color-text-on-dark); }
+.lct-stage__ficha dl { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.lct-stage__ficha dl > div { padding: var(--space-2) var(--space-4) var(--space-3); display: grid; gap: 2px; }
+.lct-stage__ficha dl > div + div { border-left: 1px solid var(--line); }
+.lct-stage__ficha dt { font-family: var(--font-semi); font-size: var(--font-size-sm); color: var(--color-text-on-dark-muted); }
+.lct-stage__ficha dd { margin: 0; font-family: var(--font-cond); font-size: var(--font-size-xl); font-weight: 500; line-height: 1.1; color: var(--color-text-on-dark); font-variant-numeric: tabular-nums; }
+.lct-stage__ficha dd span { color: var(--readout); }
+/* Móvil: la ficha baja del escenario para no tapar el modelo (el escenario conserva su alto con padding). */
+@media (max-width: 959px) { .lct-stage { aspect-ratio: auto; padding-top: 92%; } .lct-stage__ficha { position: relative; min-width: 0; } }

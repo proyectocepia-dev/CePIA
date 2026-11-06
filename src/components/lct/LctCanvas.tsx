@@ -1,6 +1,7 @@
 'use client';
 // Escena 3D del LCT para la portada, en clave de pieza de museo: el telescopio en metal oscuro, recortado por
-// luces de borde, delante de un anillo de luz que su propio plato tapa en parte (profundidad real, no un overlay).
+// luces de borde, delante de un anillo de luz desenfocado (fuera de foco, como en una toma con poca profundidad
+// de campo) que su propio plato tapa en parte: profundidad real, no un overlay.
 // Tres momentos encadenados con GSAP:
 //  1. Apuntado (al cargar): la cámara se acerca y el plato baja desde el cenit hasta su ángulo de observación;
 //     el anillo se enciende.
@@ -27,6 +28,9 @@ const conMeshopt = (loader: GLTFLoader) => { loader.setMeshoptDecoder(MeshoptDec
 /** Estado animable compartido entre GSAP (escribe) y el bucle de render (lee). */
 type Pose = { az: number; el: number; dist: number; alto: number; orbita: number; salida: number; anillo: number };
 type Clave = 'az' | 'el' | 'orbita' | 'dist' | 'alto';
+/** Lectura para la ficha: azimut en grados de brújula (0-360) y elevación sobre el horizonte. */
+export type Lectura = { az: number; el: number };
+const LECTURA_CADA = 0.1;   // s entre lecturas (10 Hz basta para un número que cambia lento)
 
 /** Pose final de un cuadro: la pose animada (apuntado + reposo) mezclada con la de salida según el scroll. */
 function mezclar(pose: Pose, clave: Clave): number {
@@ -47,12 +51,15 @@ function Entorno() {
   return null;
 }
 
-function Telescopio({ pose, alListo }: { pose: Pose; alListo: () => void }) {
+type TelescopioProps = { pose: Pose; movimiento: boolean; alListo: () => void; alLeer?: (l: Lectura) => void };
+
+function Telescopio({ pose, movimiento, alListo, alLeer }: TelescopioProps) {
   const { scene } = useLoader(GLTFLoader, LCT_MODELO, conMeshopt);
   const azimut = useRef<THREE.Object3D | null>(null);
   const elevacion = useRef<THREE.Object3D | null>(null);
   const base = useRef({ az: new THREE.Quaternion(), el: new THREE.Quaternion() });
   const giro = useMemo(() => new THREE.Quaternion(), []);
+  const ultimaLectura = useRef(-1);
 
   const materiales = useMemo(() => ({
     estructura: new THREE.MeshStandardMaterial({ color: LCT_COLORES.estructura, metalness: 0.85, roughness: 0.38, side: THREE.DoubleSide }),
@@ -82,9 +89,15 @@ function Telescopio({ pose, alListo }: { pose: Pose; alListo: () => void }) {
 
   useFrame(({ clock }) => {
     const t = clock.elapsedTime;
-    const deriva = 1 - pose.salida;   // el seguimiento se apaga a medida que avanza la salida por scroll
+    // El seguimiento se apaga a medida que avanza la salida por scroll (y no existe sin movimiento).
+    const deriva = movimiento ? 1 - pose.salida : 0;
     const az = mezclar(pose, 'az') + deg(5) * Math.sin(t * 0.07) * deriva;
     const el = mezclar(pose, 'el') + deg(2) * Math.sin(t * 0.11 + 1) * deriva;
+    if (alLeer && t - ultimaLectura.current >= LECTURA_CADA) {
+      ultimaLectura.current = t;
+      const azGrados = THREE.MathUtils.euclideanModulo(LCT_ESCENA.lectura.azCero - THREE.MathUtils.radToDeg(az), 360);
+      alLeer({ az: azGrados, el: 90 + THREE.MathUtils.radToDeg(el) });
+    }
     azimut.current?.quaternion.copy(base.current.az).multiply(giro.setFromAxisAngle(EJE_Y, az));
     elevacion.current?.quaternion.copy(base.current.el).multiply(giro.setFromAxisAngle(EJE_X, el));
   });
@@ -92,17 +105,45 @@ function Telescopio({ pose, alListo }: { pose: Pose; alListo: () => void }) {
   return <primitive object={scene} />;
 }
 
-/** Anillo de luz detrás del plato: siempre de frente a la cámara, con halos aditivos que hacen de resplandor. */
+/**
+ * Textura de un anillo desenfocado: un degradado radial con el pico en el radio del anillo. Es el desenfoque
+ * "horneado" en una textura de 512 px, así que no hay pasada de postproceso ni filtro CSS (regla v0.8).
+ * `ancho` es la mitad del espesor del brillo, como fracción del radio de la textura.
+ */
+function texturaAnillo(radio: number, ancho: number): THREE.CanvasTexture {
+  const n = 512;
+  const c = document.createElement('canvas');
+  c.width = c.height = n;
+  const ctx = c.getContext('2d');
+  if (ctx) {
+    const h = n / 2;
+    const g = ctx.createRadialGradient(h, h, 0, h, h, h);
+    const pasos: Array<[number, number]> = [
+      [radio - ancho, 0], [radio - ancho * 0.5, 0.35], [radio - ancho * 0.15, 0.85], [radio, 1],
+      [radio + ancho * 0.15, 0.85], [radio + ancho * 0.5, 0.35], [radio + ancho, 0],
+    ];
+    for (const [pos, alfa] of pasos) g.addColorStop(THREE.MathUtils.clamp(pos, 0, 1), `rgba(255,255,255,${alfa})`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, n, n);
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+/** Anillo de luz fuera de foco detrás del plato: siempre de frente a la cámara, en capas aditivas. */
 function Anillo({ pose }: { pose: Pose }) {
   const grupo = useRef<THREE.Group>(null);
   const { camera } = useThree();
   const centro = useMemo(() => new THREE.Vector3(...LCT_ESCENA.anillo.centro), []);
   const dir = useMemo(() => new THREE.Vector3(), []);
-  const mats = useMemo(() => ({
-    linea: new THREE.MeshBasicMaterial({ color: LCT_COLORES.anillo, transparent: true, toneMapped: false }),
-    halo: new THREE.MeshBasicMaterial({ color: LCT_COLORES.halo, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+  // El anillo está al 80 % del radio de la textura: el plano mide 2 * radio / 0,8 para que quede en `radio` metros.
+  const capas = useMemo(() => LCT_ESCENA.anillo.capas.map((c) => {
+    const mapa = texturaAnillo(0.8, c.ancho);
+    const mat = new THREE.MeshBasicMaterial({ map: mapa, color: c.color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+    return { mapa, mat, opacidad: c.opacidad };
   }), []);
-  useEffect(() => () => { mats.linea.dispose(); mats.halo.dispose(); }, [mats]);
+  useEffect(() => () => { capas.forEach((c) => { c.mat.dispose(); c.mapa.dispose(); }); }, [capas]);
 
   useFrame(() => {
     const g = grupo.current;
@@ -111,27 +152,26 @@ function Anillo({ pose }: { pose: Pose }) {
     dir.copy(camera.position).sub(centro).setY(0).normalize();
     g.position.copy(centro).addScaledVector(dir, -LCT_ESCENA.anillo.atras);
     g.lookAt(camera.position);
-    mats.linea.opacity = pose.anillo;
-    mats.halo.opacity = pose.anillo * 0.16;
+    capas.forEach((c) => { c.mat.opacity = pose.anillo * c.opacidad; });
     g.visible = pose.anillo > 0.01;
   });
 
-  const { radio, grosor } = LCT_ESCENA.anillo;
+  const lado = (LCT_ESCENA.anillo.radio * 2) / 0.8;
   return (
     <group ref={grupo}>
-      <mesh material={mats.linea}><torusGeometry args={[radio, grosor, 12, 192]} /></mesh>
-      <mesh material={mats.halo}><torusGeometry args={[radio, grosor * 4, 12, 192]} /></mesh>
-      <mesh material={mats.halo}><torusGeometry args={[radio, grosor * 12, 12, 192]} /></mesh>
+      {capas.map((c, i) => (
+        <mesh key={i} material={c.mat} renderOrder={-1}><planeGeometry args={[lado, lado]} /></mesh>
+      ))}
     </group>
   );
 }
 
-function Camara({ pose }: { pose: Pose }) {
+function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
   const { camera, pointer } = useThree();
   const mirar = useMemo(() => new THREE.Vector3(...LCT_ESCENA.objetivo), []);
   const suave = useRef(new THREE.Vector2());
   useFrame((_, dt) => {
-    suave.current.lerp(pointer, Math.min(1, dt * 2.5));
+    if (movimiento) suave.current.lerp(pointer, Math.min(1, dt * 2.5));
     const a = mezclar(pose, 'orbita') + suave.current.x * deg(4);
     const h = mezclar(pose, 'alto') + suave.current.y * 0.5;
     const d = mezclar(pose, 'dist');
@@ -141,9 +181,14 @@ function Camara({ pose }: { pose: Pose }) {
   return null;
 }
 
-function Coreografia({ pose }: { pose: Pose }) {
+function Coreografia({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
   useEffect(() => {
     const e = LCT_ESCENA;
+    if (!movimiento) {
+      // Sin movimiento: pose de reposo inmediata, anillo encendido, sin scroll ni deriva.
+      Object.assign(pose, { az: deg(e.reposo.az), el: deg(e.reposo.el), dist: e.reposo.dist, alto: e.reposo.alto, orbita: deg(e.reposo.orbita), anillo: 1 });
+      return;
+    }
     const ctx = gsap.context(() => {
       gsap.timeline({ delay: 0.15 })
         .to(pose, { az: deg(e.reposo.az), el: deg(e.reposo.el), dist: e.reposo.dist, alto: e.reposo.alto, orbita: deg(e.reposo.orbita), duration: 2.8, ease: 'power3.out' })
@@ -151,13 +196,13 @@ function Coreografia({ pose }: { pose: Pose }) {
       gsap.to(pose, { salida: 1, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.8 } });
     });
     return () => ctx.revert();
-  }, [pose]);
+  }, [pose, movimiento]);
   return null;
 }
 
-type Props = { activo: boolean; alListo: () => void };
+type Props = { activo: boolean; movimiento?: boolean; alListo: () => void; alLeer?: (l: Lectura) => void };
 
-export default function LctCanvas({ activo, alListo }: Props) {
+export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }: Props) {
   const pose = useMemo<Pose>(() => {
     const i = LCT_ESCENA.inicio;
     return { az: deg(i.az), el: deg(i.el), dist: i.dist, alto: i.alto, orbita: deg(i.orbita), salida: 0, anillo: 0 };
@@ -169,7 +214,7 @@ export default function LctCanvas({ activo, alListo }: Props) {
   const l = LCT_ESCENA.luz;
   return (
     <Canvas
-      frameloop={activo ? 'always' : 'never'}
+      frameloop={!activo ? 'never' : movimiento ? 'always' : 'demand'}
       dpr={[1, 1.75]}
       gl={{ antialias: true, alpha: true, powerPreference: 'default' }}
       camera={{ fov: LCT_ESCENA.fov, near: 0.5, far: 300, position: [0, LCT_ESCENA.inicio.alto, LCT_ESCENA.inicio.dist] }}
@@ -180,11 +225,11 @@ export default function LctCanvas({ activo, alListo }: Props) {
       <directionalLight position={[-16, 4, -12]} intensity={l.bordeCalido} color={LCT_COLORES.bordeCalido} />
       <Entorno />
       <Suspense fallback={null}>
-        <Telescopio pose={pose} alListo={alListo} />
+        <Telescopio pose={pose} movimiento={movimiento} alListo={alListo} alLeer={alLeer} />
         <Anillo pose={pose} />
-        <Coreografia pose={pose} />
+        <Coreografia pose={pose} movimiento={movimiento} />
       </Suspense>
-      <Camara pose={pose} />
+      <Camara pose={pose} movimiento={movimiento} />
     </Canvas>
   );
 }

@@ -28,7 +28,7 @@ export default function Inicio() {
             </div>
           </div>
           <div className="hero__stage">
-            <HeroLct foto="/img/lct-radiotelescopio.jpg" />
+            <HeroLct />
           </div>
           <dl className="readout">
             <div><dt>Sede</dt><dd>Concepción <span>36°49′S 73°03′O</span></dd></div>
