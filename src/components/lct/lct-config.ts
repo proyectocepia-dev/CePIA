@@ -15,6 +15,9 @@ export const LCT_COLORES = {
   bordeCalido: '#F58E34', // orange-500, contraluz bajo del otro lado
   anillo: '#F4F1EA',      // text-on-dark: el anillo es luz, no un color de marca
   halo: '#9FE6E3',
+  suelo2: '#24211E',      // altiplano de noche (arena oscura)
+  cerros: '#0B121A',      // silueta de los cerros
+  nieblaHorizonte: '#0E1924', // color del cielo CSS en el horizonte: funde los cerros lejanos
   panelPulido: '#DDE2E6', // aluminio limpio de los paneles del plato (lunar-100 algo más frío)
 } as const;
 
@@ -37,8 +40,11 @@ type Escena = {
   /** Rango de inclinación del plato desde el cenit (grados): -40 = 50° de elevación, el mínimo sin cruzarse
    *  con la montura en este modelo; -2 = casi cenit. */
   limiteEl: [number, number];
-  /** Corrimiento horizontal del encuadre (filmOffset, mm de película): negativo lleva el telescopio a la derecha. */
-  encuadre: { escritorio: number; movil: number };
+  /** Corrimiento del encuadre como fracción del lienzo: x negativo lleva el telescopio a la derecha; y negativo
+   *  lo baja y deja ver el horizonte arriba. */
+  encuadre: { escritorio: { x: number; y: number }; movil: { x: number; y: number } };
+  /** Llano de noche: radio de los cerros (m), su alto máximo, cota del suelo y tramo de niebla [cerca, lejos]. */
+  horizonte: { radio: number; altoCerros: number; base: number; niebla: [number, number] };
   /** Exposición del tone mapping AgX. */
   exposicion: number;
   /** Bloom (UnrealBloomPass): solo lo que supera `umbral` (anillo y brillos especulares) florece. */
@@ -51,8 +57,8 @@ type Escena = {
 };
 
 export const LCT_ESCENA: Escena = {
-  fov: 28,
-  objetivo: [0, 7.8, 0],
+  fov: 34,
+  objetivo: [0, 8, 0],
   anillo: {
     centro: [0, 8.6, 0], radio: 6.2, atras: 4.5,
     capas: [
@@ -66,13 +72,14 @@ export const LCT_ESCENA: Escena = {
   sensibilidad: { az: 16, el: 7, orbita: 7, alto: 1.4, inercia: 3.2 },
   acabado: { rugosidadPanel: 0.16, barniz: 0.5, reflejoPanel: 1.4 },
   limiteEl: [-40, -2],
-  encuadre: { escritorio: -5.5, movil: 0 },
+  encuadre: { escritorio: { x: -0.14, y: -0.12 }, movil: { x: 0, y: -0.06 } },
+  horizonte: { radio: 340, altoCerros: 30, base: -0.36, niebla: [25, 420] },
   exposicion: 0.95,
   bloom: { fuerza: 0.32, radio: 0.5, umbral: 0.92 },
   sombra: { mapa: 2048, suavidad: 4 },
-  // Cámara alta mirando hacia abajo: como el plato trabaja hacia el cenit, se le ve de frente desde arriba.
-  // El scroll lleva el plato hacia el cenit y la cámara sube sobre él (vista cenital).
-  inicio: { az: 60, el: 0, dist: 46, alto: 48, orbita: 0 },
-  reposo: { az: -10, el: -36, dist: 42, alto: 38, orbita: 0 },
-  salida: { az: 15, el: -6, dist: 22, alto: 54, orbita: 20 },
+  // Cámara elevada mirando al plato (que trabaja hacia el cenit), con el encuadre corrido hacia arriba para que
+  // se vea el horizonte del llano. El scroll lleva el plato al cenit y la cámara sube a vista casi cenital.
+  inicio: { az: 60, el: 0, dist: 70, alto: 30, orbita: 0 },
+  reposo: { az: -10, el: -36, dist: 44, alto: 15, orbita: 0 },
+  salida: { az: 15, el: -6, dist: 24, alto: 48, orbita: 20 },
 };

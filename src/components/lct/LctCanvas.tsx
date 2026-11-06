@@ -18,6 +18,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { LCT_COLORES, LCT_ESCENA, LCT_MODELO } from './lct-config';
 import Posproceso from './Posproceso';
+import Horizonte from './Horizonte';
 
 gsap.registerPlugin(ScrollTrigger);
 const deg = THREE.MathUtils.degToRad;
@@ -213,7 +214,7 @@ function Anillo({ pose }: { pose: Pose }) {
   // El anillo está al 80 % del radio de la textura: el plano mide 2 * radio / 0,8 para que quede en `radio` metros.
   const capas = useMemo(() => LCT_ESCENA.anillo.capas.map((c) => {
     const mapa = texturaAnillo(0.8, c.ancho);
-    const mat = new THREE.MeshBasicMaterial({ map: mapa, color: c.color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+    const mat = new THREE.MeshBasicMaterial({ map: mapa, color: c.color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, fog: false });
     return { mapa, mat, opacidad: c.opacidad };
   }), []);
   useEffect(() => () => { capas.forEach((c) => { c.mat.dispose(); c.mapa.dispose(); }); }, [capas]);
@@ -251,10 +252,16 @@ function Camara({ pose, movimiento }: { pose: Pose; movimiento: boolean }) {
     const d = mezclar(pose, 'dist');
     camera.position.set(Math.sin(a) * d, h, Math.cos(a) * d);
     camera.lookAt(mirar);
-    // Encuadre: en escritorio el telescopio se corre a la derecha del centro para dejar aire al título.
+    // Encuadre: en escritorio el telescopio se corre a la derecha (aire para el título) y la vista sube para que
+    // aparezca el horizonte del llano sobre el plato.
     const pc = camera as THREE.PerspectiveCamera;
-    const corrimiento = size.width >= 960 ? LCT_ESCENA.encuadre.escritorio : LCT_ESCENA.encuadre.movil;
-    if (pc.filmOffset !== corrimiento) { pc.filmOffset = corrimiento; pc.updateProjectionMatrix(); }
+    const e = size.width >= 960 ? LCT_ESCENA.encuadre.escritorio : LCT_ESCENA.encuadre.movil;
+    const ox = Math.round(e.x * size.width);
+    const oy = Math.round(e.y * size.height);
+    const v = pc.view;
+    if (!v || v.offsetX !== ox || v.offsetY !== oy || v.fullWidth !== size.width || v.fullHeight !== size.height) {
+      pc.setViewOffset(size.width, size.height, ox, oy, size.width, size.height);
+    }
   });
   return null;
 }
@@ -301,7 +308,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
         gl.toneMapping = THREE.AgXToneMapping;
         gl.toneMappingExposure = LCT_ESCENA.exposicion;
       }}
-      camera={{ fov: LCT_ESCENA.fov, near: 0.5, far: 300, position: [0, LCT_ESCENA.inicio.alto, LCT_ESCENA.inicio.dist] }}
+      camera={{ fov: LCT_ESCENA.fov, near: 0.5, far: 1400, position: [0, LCT_ESCENA.inicio.alto, LCT_ESCENA.inicio.dist] }}
     >
       <hemisphereLight args={[LCT_COLORES.cielo, LCT_COLORES.suelo, l.hemisferio]} />
       <directionalLight
@@ -316,6 +323,7 @@ export default function LctCanvas({ activo, movimiento = true, alListo, alLeer }
       <Puntero movimiento={movimiento} />
       <Entorno />
       <Suspense fallback={null}>
+        <Horizonte />
         <Telescopio pose={pose} movimiento={movimiento} alListo={alListo} alLeer={alLeer} />
         <Anillo pose={pose} />
         <Coreografia pose={pose} movimiento={movimiento} />

@@ -4,6 +4,7 @@ import Logo from '@/components/Logo';
 import NewsCard from '@/components/NewsCard';
 import Graticule from '@/components/Graticule';
 import HeroLct from '@/components/lct/HeroLct';
+import HeroReveal from '@/components/HeroReveal';
 import Sky from '@/components/Sky';
 import { categorias, noticias } from '@/lib/content';
 
@@ -16,6 +17,7 @@ export default function Inicio() {
         <Sky variante="hero" estrellas={260} />
         <Graticule />
         <Header />
+        <HeroReveal />
         <div className="c-watermark" aria-hidden="true"><Logo variant="iso" /></div>
         <div className="u-container hero__inner">
           <div className="hero__copy">

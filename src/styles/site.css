@@ -566,3 +566,15 @@ body { overscroll-behavior-y: none; }
   .lct-stage__carga { left: 68%; }
   .hero__inner { align-content: center; }
 }
+
+/* Portada compacta (T1.18): menú retraído en la primera vista (aparece al bajar o con foco de teclado) y título
+   con tope por alto de ventana para que los botones quepan sin scroll. */
+html[data-menu] .hero .c-nav { transition: opacity .24s var(--motion-ease-out), translate .24s var(--motion-ease-out); }
+html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; translate: 0 -6px; pointer-events: none; }
+.hero__copy h1 { font-size: min(clamp(3.4375rem, 1.6rem + 6.4vw, 6.875rem), 11.5svh); }
+@media (min-width: 960px) { .hero__inner { min-height: 100svh; padding-top: calc(var(--space-9) + var(--space-2)); } }
+/* Móvil: los bordes del lienzo se funden para que el suelo del llano no se vea como una caja. */
+@media (max-width: 959px) {
+  .lct-stage__canvas { -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent);
+                               mask-image: linear-gradient(transparent, #000 14%, #000 82%, transparent); }
+}
