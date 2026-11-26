@@ -17,7 +17,7 @@ export default function Lct() {
           <div className="u-container">
             <figure className="c-media-card c-media-card--bleed" style={{ margin: 0, aspectRatio: '21 / 9' }}>
               <span className="c-media-card__label c-eyebrow">Leighton Chajnantor Telescope</span>
-              <img src={p.imagen} alt="Radiotelescopio dentro de su domo abierto bajo un cielo estrellado" />
+              <img src="/img/lct-radiotelescopio.jpg" alt="Radiotelescopio dentro de su domo abierto bajo un cielo estrellado" />
             </figure>
           </div>
         </section>

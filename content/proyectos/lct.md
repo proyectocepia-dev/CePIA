@@ -6,7 +6,9 @@ rol: propio
 resumen: Traslado y renovación del radiotelescopio submilimétrico Leighton, de 10,4 m, desde Hawái al llano de Chajnantor.
 banda: submm
 socios: [Caltech, ShNU]
-imagen: /img/lct-radiotelescopio.jpg
+imagen: /img/proyectos/lct.webp
+imagenTipo: ilustracion
+imagenAlt: "Ilustración del Leighton Chajnantor Telescope basada en su geometría, sobre un paisaje seco de Chajnantor al anochecer."
 orden: 0
 ---
 Proyecto originado en la Universidad de Concepción para sumar al país un radiotelescopio de 10,4 metros de diámetro, hoy en Hawái, que se instalará en el llano de Chajnantor, uno de los mejores sitios de observación astronómica del mundo. Lo desarrollan la UdeC, el Instituto de Tecnología de California (Caltech) y la Universidad Normal de Shanghái (ShNU).

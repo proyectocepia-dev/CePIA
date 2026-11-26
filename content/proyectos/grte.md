@@ -7,7 +7,7 @@ orden: 2
 editorial: por-confirmar
 imagen: /img/proyectos/grte.webp
 imagenTipo: ilustracion
-imagenAlt: "Ilustración de un radiotelescopio educativo genérico con plato de malla y montura metálica."
+imagenAlt: "Ilustración de un radiotelescopio educativo genérico impreso en 3D, con plato de pétalos y montura motorizada."
 ---
 GrTE es una iniciativa de radiotelescopio de bajo costo orientada a estudiantes de colegio. Vincula la instrumentación astronómica con una propuesta educativa.
 

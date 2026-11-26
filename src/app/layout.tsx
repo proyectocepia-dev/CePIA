@@ -18,9 +18,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? 'https://' + process.env.VERCEL_PROJECT_PRODUCTION_URL : 'https://cepia.vercel.app')),
   openGraph: {
     type: 'website', locale: 'es_CL', siteName: 'CePIA',
-    images: [{ url: '/img/cepia-open-graph.png', width: 1200, height: 630, alt: 'CePIA: instrumentación astronómica y modelo 3D del LCT' }],
+    images: [{ url: '/img/cepia-open-graph.jpg', width: 1200, height: 630, alt: 'CePIA: instrumentación astronómica y modelo 3D del LCT' }],
   },
-  twitter: { card: 'summary_large_image', images: ['/img/cepia-open-graph.png'] },
+  twitter: { card: 'summary_large_image', images: ['/img/cepia-open-graph.jpg'] },
   title: { default: 'CePIA · Centro para la Instrumentación Astronómica', template: '%s · CePIA' },
   description: 'Centro para la Instrumentación Astronómica de la Universidad de Concepción.',
   robots: { index: false, follow: false },
