@@ -10,7 +10,7 @@ const iniciales = (n: string) => n.replace(/^Dr\.\s*/, '').split(' ').map((w) =>
 export default function Somos() {
   return (
     <>
-      <PageHero title="Somos" lead="Un laboratorio de la Universidad de Concepción que diseña instrumentación para la astronomía y otras disciplinas." crumbs={[{ label: 'Somos' }]} />
+      <PageHero tema="somos" title="Somos" lead="Un laboratorio de la Universidad de Concepción que diseña instrumentación para la astronomía y otras disciplinas." crumbs={[{ label: 'Somos' }]} />
       <main id="contenido">
         <section className="s-light u-hex-dish" style={{ '--dish-x': '92%', '--dish-y': '10%', '--dish-size': '466px' } as CSSProperties}>
           <div className="u-container u-grid-2" style={{ alignItems: 'start' }}>

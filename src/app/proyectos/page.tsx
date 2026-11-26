@@ -8,22 +8,12 @@ export const metadata = { title: 'Proyectos' };
 
 export default function Proyectos() {
   const todos = proyectos();
+  const lct = todos.find((p) => p.id === 'lct');
   const contar = (id: string) => todos.filter((p) => p.categoria === id).length;
   return (
     <>
-      <PageHero title="Proyectos" lead="Instrumentación para la astronomía, organizada en cinco líneas de trabajo y el LCT." crumbs={[{ label: 'Proyectos' }]} />
+      <PageHero tema="proyectos" title="Proyectos" lead="Instrumentación para la astronomía, organizada en cinco líneas de trabajo." crumbs={[{ label: 'Proyectos' }]} />
       <main id="contenido">
-        <section className="s-night" aria-labelledby="lct" style={{ paddingTop: 'var(--space-8)' }}>
-          <div className="u-container">
-            <Link className="feature-link" href="/proyectos/lct" style={{ minHeight: 466 }}>
-              <img src="/img/lct-radiotelescopio.jpg" alt="" loading="lazy" />
-              <span className="c-chip c-chip--accent">Proyecto destacado</span>
-              <h2 id="lct">Leighton Chajnantor Telescope</h2>
-              <p>Traslado y renovación del radiotelescopio submilimétrico Leighton, de 10,4 m, desde Hawái al llano de Chajnantor, junto a Caltech y ShNU.</p>
-              <span className="c-btn--arrow">Conocer el LCT </span>
-            </Link>
-          </div>
-        </section>
 
         <section className="s-night s-night--deep" aria-labelledby="lineas">
           <div className="u-container">
@@ -31,7 +21,11 @@ export default function Proyectos() {
               <span className="c-rule c-meta">Líneas de trabajo</span>
               <h2 id="lineas" className="t-h2">Categorías</h2>
             </div>
-            <CategoryCoverflow items={categorias().map((c) => ({ id: c.id, href: `/proyectos/${c.id}`, nombre: c.nombre, resumen: c.resumen, meta: `${contar(c.id)} ${contar(c.id) === 1 ? 'proyecto' : 'proyectos'}` }))} />
+            <CategoryCoverflow items={[
+              ...categorias().map((c) => ({ id: c.id, href: `/proyectos/${c.id}`, nombre: c.nombre, resumen: c.resumen, meta: `${contar(c.id)} ${contar(c.id) === 1 ? 'proyecto' : 'proyectos'}` })),
+              // El LCT va como un elemento más de la lista (sin bloque destacado): solo se destaca en la portada.
+              ...(lct ? [{ id: lct.id, href: '/proyectos/lct', nombre: lct.titulo, resumen: lct.resumen, meta: 'Proyecto propio' }] : []),
+            ]} />
           </div>
         </section>
 

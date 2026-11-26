@@ -28,7 +28,7 @@ export default async function Categoria({ params }: Props) {
     : [{ titulo: 'Proyectos', items: enCategoria }];
   return (
     <>
-      <PageHero title={c.nombre} lead={c.resumen} meta={`Proyectos · ${String(c.orden).padStart(2, '0')}`} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: c.nombre }]} />
+      <PageHero tema={c.id === 'atmosfera' ? 'atmosfera' : undefined} title={c.nombre} lead={c.resumen} meta={`Proyectos · ${String(c.orden).padStart(2, '0')}`} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: c.nombre }]} />
       <main id="contenido">
         <section className="s-light u-hex-dish" style={{ '--dish-x': '90%', '--dish-y': '20%', '--dish-size': '466px' } as CSSProperties}>
           <div className="u-container prose">
