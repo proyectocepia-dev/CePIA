@@ -35,6 +35,12 @@ const proyecto = z.object({
   banda: z.string().optional(),
   socios: z.array(z.string()).default([]),
   imagen: z.string().optional(),
+  imagenTipo: z.enum(['ilustracion', 'fotografia']).optional(),
+  imagenAlt: z.string().optional(),
+  imagenCredito: z.string().optional(),
+  imagenFuente: z.string().url().optional(),
+  imagenLicencia: z.string().optional(),
+  imagenLicenciaUrl: z.string().url().optional(),
   orden: z.number().default(99),
   editorial,
 });

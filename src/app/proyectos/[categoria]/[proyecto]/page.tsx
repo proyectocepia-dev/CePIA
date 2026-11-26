@@ -4,6 +4,7 @@ import PageHero from '@/components/PageHero';
 import PubList from '@/components/PubList';
 import NewsCard from '@/components/NewsCard';
 import Pending from '@/components/Pending';
+import ProjectImage from '@/components/ProjectImage';
 import { categoriaPorId, noticias, proyectos, publicaciones, siglas } from '@/lib/content';
 
 type Props = { params: Promise<{ categoria: string; proyecto: string }> };
@@ -38,6 +39,7 @@ export default async function Ficha({ params }: Props) {
               {d.editorial === 'por-confirmar' && <Pending text="Ficha por confirmar con el centro" />}
             </div>
             <aside className="facts" aria-label="Datos del proyecto">
+              <ProjectImage p={d} />
               <dl>
                 <div><dt>Línea</dt><dd><Link href={`/proyectos/${cat.id}`}>{cat.nombre}</Link></dd></div>
                 <div><dt>Estado</dt><dd>{d.estado === 'activo' ? 'Activo' : 'Finalizado'}</dd></div>

@@ -9,6 +9,8 @@ export const metadata = { title: 'Proyectos' };
 export default function Proyectos() {
   const todos = proyectos();
   const lct = todos.find((p) => p.id === 'lct');
+  const portada: Record<string, string> = { 'milimetricas-submm': 'mmics', atmosfera: 'radiometros', colaboraciones: 'eht-titans', 'transferencia-tecnologica': 'radiowood', academicos: 'grte' };
+  const imagenCategoria = (id: string) => todos.find((p) => p.id === portada[id]);
   const contar = (id: string) => todos.filter((p) => p.categoria === id).length;
   return (
     <>
@@ -22,9 +24,9 @@ export default function Proyectos() {
               <h2 id="lineas" className="t-h2">Categorías</h2>
             </div>
             <CategoryCoverflow items={[
-              ...categorias().map((c) => ({ id: c.id, href: `/proyectos/${c.id}`, nombre: c.nombre, resumen: c.resumen, meta: `${contar(c.id)} ${contar(c.id) === 1 ? 'proyecto' : 'proyectos'}` })),
+              ...categorias().map((c) => ({ id: c.id, href: `/proyectos/${c.id}`, nombre: c.nombre, resumen: c.resumen, imagen: imagenCategoria(c.id)?.imagen, imagenTipo: imagenCategoria(c.id)?.imagenTipo, provisional: imagenCategoria(c.id)?.editorial === 'por-confirmar', meta: `${contar(c.id)} ${contar(c.id) === 1 ? 'proyecto' : 'proyectos'}` })),
               // El LCT va como un elemento más de la lista (sin bloque destacado): solo se destaca en la portada.
-              ...(lct ? [{ id: lct.id, href: '/proyectos/lct', nombre: lct.titulo, resumen: lct.resumen, meta: 'Proyecto propio' }] : []),
+              ...(lct ? [{ id: lct.id, href: '/proyectos/lct', nombre: lct.titulo, resumen: lct.resumen, imagen: lct.imagen, imagenTipo: lct.imagenTipo, meta: 'Proyecto propio' }] : []),
             ]} />
           </div>
         </section>

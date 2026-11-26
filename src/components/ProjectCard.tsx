@@ -7,8 +7,10 @@ export default function ProjectCard({ p, i = 0 }: { p: Proyecto; i?: number }) {
   return (
     <Link className="c-project-card" href={rutaProyecto(p)} prefetch={false}>
       <div className={`c-project-card__art ${art}`}>
-        {p.imagen ? <img src={p.imagen} alt="" loading="lazy" /> : <span>{p.sigla}</span>}
+        {p.imagen ? <img src={p.imagen} alt="" loading="lazy" width={1200} height={1500} /> : <span>{p.sigla}</span>}
       </div>
+      {p.imagenTipo === 'ilustracion' && <span className="project-image-note">Ilustración</span>}
+      {p.imagenCredito && <span className="project-image-note">Foto: {p.imagenCredito} · {p.imagenLicencia}</span>}
       <span className="card-top">
         <span className="c-chip c-chip--accent">{p.rol === 'colaboracion' ? 'Colaboración' : p.estado === 'pasado' ? 'Finalizado' : 'Activo'}</span>
         {p.banda && <span className="c-meta">{p.banda}</span>}

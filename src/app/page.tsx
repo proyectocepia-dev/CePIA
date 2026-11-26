@@ -10,8 +10,8 @@ import LineasAcordeon from '@/components/LineasAcordeon';
 import CategoryCoverflow, { type CoverflowItem } from '@/components/CategoryCoverflow';
 import { categorias, noticias, proyectos, rutaProyecto } from '@/lib/content';
 
-/** Orden del slider de destacados: el LCT queda al centro y GrTE a su derecha. */
-const DESTACADOS = ['eht-titans', 'radiometros', 'lct', 'grte', 'mmics'];
+/** EHT abre los destacados; el LCT mantiene el protagonismo del hero. */
+const DESTACADOS = ['mmics', 'radiometros', 'eht-titans', 'grte', 'lct'];
 
 export default function Inicio() {
   const cats = categorias();
@@ -20,7 +20,7 @@ export default function Inicio() {
   const destacados: CoverflowItem[] = DESTACADOS.flatMap((id) => {
     const p = todos.find((x) => x.id === id);
     if (!p) return [];
-    return [{ id: p.id, href: id === 'grte' ? '/grte' : rutaProyecto(p), nombre: p.titulo, resumen: p.resumen, meta: p.sigla, imagen: p.imagen }];
+    return [{ id: p.id, href: id === 'grte' ? '/grte' : rutaProyecto(p), nombre: p.titulo, resumen: p.resumen, meta: p.sigla, imagen: p.imagen, imagenTipo: p.imagenTipo, provisional: p.editorial === 'por-confirmar' }];
   });
   return (
     <>
