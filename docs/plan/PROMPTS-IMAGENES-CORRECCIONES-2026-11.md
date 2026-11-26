@@ -60,3 +60,24 @@ Partir de la misma captura real del hero, ya con `main` al día. Encuadre más c
 ---
 
 Orden: 4 (LCT) → 2 (GrTE) → 1 (EHT) → 3 (IH) → 5 (OVRO) → 6 (OG). Mostrar cada imagen antes de pasar a la siguiente.
+
+---
+
+## 7. Imágenes de las Líneas de trabajo (acordeón de la portada) — nuevas
+
+El código ya está listo: cada imagen se muestra sola en cuanto exista el archivo `public/img/lineas/<id>.webp` (no hay que tocar código).
+Misma serie y mismo **bloque base (§2 de `PROMPTS-IMAGENES-CODEX.md`)**, con estos cambios de formato porque el panel abierto es apaisado y los cerrados son franjas verticales:
+
+- **Formato:** 16:10, `1600 × 1000`, WebP < 220 KB.
+- **Composición (reemplaza la del bloque base):** sujeto en el **centro-derecha**; el **tercio izquierdo y el 40 % inferior** caen a casi negro `#0F1012` (ahí va el título y el texto). El centro vertical de la imagen debe leerse bien recortado como franja angosta (paneles cerrados).
+- Son escenas de **línea** (más amplias que las de proyecto) y no deben repetir ninguna imagen de proyecto.
+
+| Archivo | Sujeto |
+|---|---|
+| `milimetricas-submm.webp` | An open cryostat seen from above at three-quarter angle: a cold plate with a small hexagonal cluster of seven corrugated aluminium feedhorns, copper thermal straps and thin coaxial lines, a round vacuum window ring at the edge. Generic, no recognisable instrument. |
+| `atmosfera.webp` | The high Andean plateau at night at about 5000 m: flat dry ground, distant dark volcano silhouettes, thin translucent wisps of water vapour drifting low across a starry petrol-blue sky, a faint orange line on the horizon. A tiny generic weather-instrument mast far away for scale. No people, no buildings. |
+| `colaboraciones.webp` | Three or four generic radio dishes of different sizes spread across a desert plain at blue hour, seen from a low distance, dishes pointing to the same patch of sky, faint dotted lines of light linking them (very subtle). Not ALMA, not any recognisable observatory. |
+| `transferencia-tecnologica.webp` | A clean lab bench: a plank of raw wood passing under a small microwave horn on a gantry, a compact electronics module beside it, cables neatly routed. Industrial yet precise. No text on screens, no people. |
+| `academicos.webp` | A teaching optics bench: a small parabolic reflector model on a stand, a feed at its focus, a laser-like thin aqua beam tracing rays from the dish to the focus, a few calibration tools on the table. Educational, not a toy. |
+
+Control de calidad igual que §5, más: al recortar la imagen al centro a 1:4 (franja vertical) el sujeto se sigue reconociendo.

@@ -769,3 +769,24 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
   .coverflow--claro .coverflow__track { height: 620px; }
   .project-image img { max-height: 560px; }
 }
+
+/* Proyectos destacados (portada): tarjetas un poco más chicas para que sección completa (título, carrusel y controles)
+   quepa en una vista de escritorio. */
+@media (min-width: 721px) {
+  .home-featured { padding-block: var(--space-7); }
+  .home-featured .sec-head { margin-bottom: var(--space-5); }
+  .coverflow--claro .coverflow__track { height: clamp(470px, calc(100svh - 330px), 560px); }
+  .coverflow--claro .coverflow__item { --w: min(80vw, 350px); }
+  .coverflow--claro .coverflow__card img { min-height: 150px; }
+  .coverflow--claro .coverflow__body { padding: var(--space-4) var(--space-5) var(--space-5); }
+}
+
+/* Líneas de trabajo con imagen (public/img/lineas/<id>.webp, misma serie que las de proyectos). La imagen va detrás,
+   muy apagada en los paneles cerrados; en el abierto, un velo inferior mantiene el texto en AA. */
+.acordeon__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; z-index: 0;
+  opacity: .28; transition: opacity var(--motion-duration-slow) var(--motion-ease-out); }
+.acordeon__panel[data-activo="true"] .acordeon__img { opacity: 1; }
+.acordeon__panel[data-imagen]::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(180deg, rgba(7,12,17,.15) 0%, rgba(7,12,17,.35) 45%, rgba(7,12,17,.94) 100%); }
+.acordeon__panel[data-imagen] :is(.acordeon__tab, .acordeon__body) { z-index: 1; }
+@media (max-width: 720px) { .acordeon__img { display: none; } .acordeon__panel[data-imagen]::after { display: none; } }

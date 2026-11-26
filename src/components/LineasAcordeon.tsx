@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-export type LineaItem = { id: string; nombre: string; resumen: string };
+export type LineaItem = { id: string; nombre: string; resumen: string; imagen?: string };
 
 /** Acordeón horizontal de las líneas de trabajo en la portada (T1.20). En móvil se apila en filas. */
 export default function LineasAcordeon({ items }: { items: LineaItem[] }) {
@@ -12,7 +12,8 @@ export default function LineasAcordeon({ items }: { items: LineaItem[] }) {
       {items.map((c, i) => {
         const abierto = i === activo;
         return (
-          <li key={c.id} className="acordeon__panel" data-activo={abierto} onMouseEnter={() => setActivo(i)}>
+          <li key={c.id} className="acordeon__panel" data-activo={abierto} data-imagen={c.imagen ? '' : undefined} onMouseEnter={() => setActivo(i)}>
+            {c.imagen && <img className="acordeon__img" src={c.imagen} alt="" loading="lazy" decoding="async" />}
             <button
               type="button"
               className="acordeon__tab"
