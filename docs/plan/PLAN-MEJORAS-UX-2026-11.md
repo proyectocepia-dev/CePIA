@@ -3,7 +3,7 @@
 Base: `docs/plan/REVISION-UX-2026-11.md` (revisión sobre `7ae919c`).
 Verificado contra `main` el 26-nov-2026. `main` sigue en `7ae919c`, así que la revisión mira exactamente lo que está publicado en cepia.vercel.app. No se revisó si hay trabajo local sin subir en el PC.
 
-**Estado: solo plan. No se implementa nada hasta el VB.**
+**Estado: solo plan. No se implementa nada hasta el VB.** Actualizado el 26-nov por la tarde con nuevas decisiones: ver §5, que manda por sobre §1-§4 donde difieran.
 
 Reglas que manda este plan por sobre la revisión:
 - Legibilidad: cuerpo ≥ 18 px, secundario ≥ 15 px, interlineado ~1,6, contraste AA o mejor, Light solo desde 24 px, nada de Thin. Es más estricto que el umbral de la revisión (AA en texto < 18 px).
@@ -11,7 +11,8 @@ Reglas que manda este plan por sobre la revisión:
 - Cada tanda va en su rama y su PR, se revisa en la versión de prueba (URL preview de la rama) y llega a cepia.vercel.app solo con VB.
 - Cambios quirúrgicos, sin reescribir componentes. Imágenes en WebP livianas en `public/img/`, nunca base64.
 - Fotos de personas o estudiantes solo con consentimiento. Las ilustraciones propias del equipo se pueden usar.
-- Tipografía: Barlow (gratis). El lente "portafolio/reclutador" de la revisión es secundario: es un sitio para un cliente.
+- Tipografía: Barlow (gratis).
+- Objetivo (actualizado el 26-nov): el sitio tiene que verse **completo y terminado**, porque también servirá como referencia de portafolio. Calidad antes que rapidez. Ver §5.
 
 ---
 
@@ -138,3 +139,69 @@ Lo que cambia respecto de la propuesta:
 2. **Opus revisa antes de que tú veas el PR** las tandas que tocan el hero o el diseño (2, 3, 5 y 6). Las de bajo riesgo (1 y 4) pasan con la puerta automática.
 3. **Una tanda a la vez sobre `site.css`.** Nada de varios agentes en paralelo sobre el mismo archivo.
 4. **Ciclo por tanda:** Opus especifica → Sonnet construye → puerta (Haiku) → Opus revisa (si aplica) → PR con URL de prueba → tu VB → merge a `main`.
+
+---
+
+## 5. Actualización 26-nov (tarde): decisiones nuevas
+
+**Decisiones tomadas**
+1. El LCT **sí se genera** con Codex, fiel a su geometría real (prompt en `PROMPTS-IMAGENES-CORRECCIONES-2026-11.md` §4).
+2. En `/proyectos` el LCT **deja de ir destacado**. Solo se destaca en la portada.
+3. Cada hero de sección lleva una **variación gráfica según su temática**, sin romper el estilo. El visor circular (`Reticle`) que hoy aparece en todos los heros interiores se quita.
+4. Meta: que el sitio se vea terminado. Calidad antes que rapidez.
+
+**Estado de las imágenes (revisadas en el repo local de Codex)**
+- Aprobadas: mkid, pixel-3mm, code, isi, radiowood, radiometros, 3m-scalpi, dts, mmics.
+- Rehacer: eht-titans (estación en el mar), grte (plato genérico, tapa la esquina del número), integracion-hibrida (igual a mmics). Nueva: lct.
+- Ajustar: ovro (recorte 4:5 y tercio inferior oscuro) y la imagen OG (más cerrada, en JPG < 200 KB).
+- Prompts: `docs/plan/PROMPTS-IMAGENES-CORRECCIONES-2026-11.md`.
+- **Riesgo:** el repo local está 3 PR atrás de `main` y tiene 22 archivos modificados. Antes de subir, hay que traer `main` y resolver conflictos sin perder los PR #3, #4 y #5.
+- Falta: el carrusel de `/proyectos` muestra **categorías**, no proyectos, y las categorías no tienen imagen. Propuesta: el carrusel de categorías usa el mismo arte temático de su hero (ver Tanda H), así no hacen falta 5 imágenes más y todo queda conectado.
+
+### Tanda I · Subir las imágenes de Codex (reemplaza la Tanda 2)
+- Archivos: `public/img/proyectos/*.webp`, `content/proyectos/*.md` (`imagen`, `imagenTipo`, `imagenAlt`, crédito), `src/components/ProjectImage.tsx`, `src/lib/content.ts`, `src/components/CategoryCoverflow.tsx`, `src/components/ProjectCard.tsx`, `docs/IMAGENES-PROYECTOS-2026-11.md`.
+- Hecho cuando: las 14 tarjetas de proyecto tienen imagen aprobada, el número de la tarjeta no queda encima de la figura, y el crédito del OVRO se ve en su ficha.
+- Revisar en la versión de prueba los textos nuevos de las fichas que redactó Codex: tienen que salir de datos ya documentados.
+- Modelo: Codex genera y Sonnet integra sobre `main` actual. Opus revisa cada imagen y la tanda completa.
+
+### Tanda P · `/proyectos` sin el LCT destacado
+- Archivos: `src/app/proyectos/page.tsx` (quitar el bloque `feature-link` del LCT; el lead deja de decir "y el LCT"), y `src/lib/nav.ts` solo si el LCT deja de ser subítem propio (pregunta abierta: hoy el cliente lo pidió como bloque propio en Proyectos, así que propongo dejarlo en el menú y en el listado como un elemento más, sin tamaño especial).
+- La portada no cambia: el LCT sigue en el hero 3D.
+- Modelo: Sonnet. Verifica Haiku.
+
+### Tanda H · Heros temáticos por sección
+Base técnica: `PageHero` recibe un prop `tema` y monta un componente nuevo, `HeroTema.tsx`, con un **SVG en línea** por tema: líneas aqua finas, lecturas en Barlow Semi Condensed, la misma retícula y el mismo cielo. Sin imágenes ni 3D, así que pesa poco y carga al instante. Animación mínima con transform/opacity y nada con movimiento reducido. Se quita `Reticle` de `PageHero` (se mantiene en el repo por si se usa en otro lado). Siempre que se pueda, el dibujo usa **datos reales** del centro: eso es lo que lo hace propio y no decorativo.
+
+| Sección | Motivo gráfico | Dato real que lo sostiene |
+|---|---|---|
+| Somos | Arco entre Concepción y Chajnantor con sus coordenadas | Coordenadas del readout de la portada |
+| Proyectos | Regla del espectro con las bandas mm y submm marcadas | Bandas de los proyectos |
+| Milimétricas/Submm | Corte de guía de onda y bocina corrugada en línea técnica | Pixel de 3 mm |
+| Atmósfera | Curva de transmisión atmosférica con la línea del vapor de agua | Curva pública de Chajnantor (por confirmar fuente) |
+| Colaboraciones | Red de líneas de base entre antenas (interferometría) | Sitios de los socios |
+| Transferencia Tecnológica | Señal que pasa por anillos de crecimiento (Radiowood) | Radiowood |
+| Académicos | Plato pequeño con su haz (GrTE y formación) | GrTE |
+| LCT | Silueta técnica del plato con elevación y azimut | Ficha del LCT (10,4 m) |
+| Infraestructura | Escala de temperatura criogénica en kelvin | Estación criogénica |
+| Vinculación | Nodos conectados (industria, educación, I+D) | Los 3 bloques de la página |
+| Publicaciones | Línea de tiempo con marcas por año | Años de `publicaciones.json` |
+| Blog | Marcas de tiempo tipo registro de observación | Fechas de noticias |
+| GrTE | Varias antenas pequeñas en red (escuelas) | Proyecto GrTE |
+| Contacto | Rosa de rumbos con la ubicación de la sede | Dirección del centro |
+| 404 | "Señal perdida": ruido con una línea plana | — |
+
+- Archivos: `src/components/PageHero.tsx`, `src/components/HeroTema.tsx` (nuevo; si crece, `src/components/hero-temas/*.tsx`, uno por tema), cada `src/app/**/page.tsx` que use `PageHero` (solo agregar `tema`), y `src/styles/site.css` (bloque nuevo `.hero-tema`).
+- Orden: Opus diseña 3 temas primero (Proyectos, Atmósfera y Somos) y los muestra en la versión de prueba. Con tu VB sobre esos 3, Sonnet hace el resto siguiendo el mismo patrón.
+- Riesgo: que cada hero se vuelva un estilo distinto. Regla: mismo grosor de línea, mismos dos colores (aqua para trazos, naranja solo en un punto de acento), misma posición (a la derecha, detrás del texto) y la misma opacidad máxima.
+- Hecho cuando: cada sección se reconoce por su hero, el texto pasa AA encima y nada se mueve con movimiento reducido.
+
+### Tanda T · "Se ve terminado"
+- `src/components/Pending.tsx`: los avisos "por confirmar" se ven solo en la versión de prueba (por variable de entorno) y nunca en producción.
+- Quitar "Plataforma en desarrollo" de `/grte` y reemplazarlo por qué es, para quién es y cómo participar (con lo que ya se sabe).
+- "Noticias recientes" pasa a "Noticias" mientras no lleguen noticias de 2025-2026.
+- Revisión de todas las páginas interiores con la puerta de calidad (Tanda 0): ningún bloque vacío ni texto provisorio a la vista.
+- Footer: © con el año y correo de contacto cuando el centro lo confirme.
+
+### Orden nuevo
+0 (puerta de calidad) → I (imágenes) → P (`/proyectos`) → H (heros: primero 3 temas, luego el resto) → 3 (póster del 3D y OG) → 1 (accesibilidad y siglas) → 4 (contraste medido) → T (se ve terminado) → 5 y 6 (portada y cabecera, según tus decisiones) → 8 (lanzamiento).
+Codex sigue generando imágenes en paralelo. Las tandas que tocan `site.css` van una a la vez.
