@@ -11,7 +11,7 @@ export default function Lct() {
   const notas = noticias().filter((n) => n.proyecto === 'lct');
   return (
     <>
-      <PageHero title={p.titulo} lead={p.resumen} meta="LCT · submilimétrico · 10,4 m" crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: 'LCT' }]} />
+      <PageHero tema="lct" title={p.titulo} lead={p.resumen} meta="LCT · submilimétrico · 10,4 m" crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: 'LCT' }]} />
       <main id="contenido">
         <section className="s-night" style={{ paddingTop: 'var(--space-8)' }}>
           <div className="u-container">

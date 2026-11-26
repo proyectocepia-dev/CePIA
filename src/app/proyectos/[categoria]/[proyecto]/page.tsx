@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import PageHero from '@/components/PageHero';
+import { temaDeCategoria } from '@/components/HeroTema';
 import PubList from '@/components/PubList';
 import NewsCard from '@/components/NewsCard';
 import Pending from '@/components/Pending';
@@ -30,7 +31,7 @@ export default async function Ficha({ params }: Props) {
   const notas = noticias().filter((n) => n.proyecto === d.id);
   return (
     <>
-      <PageHero title={d.titulo} lead={d.resumen} meta={[d.sigla, d.banda].filter(Boolean).join(' · ')} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: cat.nombre, href: `/proyectos/${cat.id}` }, { label: d.sigla }]} />
+      <PageHero tema={temaDeCategoria(d.categoria) ?? 'proyectos'} title={d.titulo} lead={d.resumen} meta={[d.sigla, d.banda].filter(Boolean).join(' · ')} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: cat.nombre, href: `/proyectos/${cat.id}` }, { label: d.sigla }]} />
       <main id="contenido">
         <section className="s-light">
           <div className="u-container split">

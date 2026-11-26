@@ -724,6 +724,9 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
 .hero-tema .ht-eje { stroke: var(--line-strong); stroke-width: 1.2; fill: none; }
 .hero-tema .ht-guia { stroke: var(--line); stroke-width: 1; fill: none; }
 .hero-tema .ht-guia--fuerte { stroke: var(--line-strong); stroke-dasharray: 3 5; }
+.hero-tema .ht-guia--suave { stroke: var(--line-strong); opacity: .6; }
+.hero-tema .ht-trazo--barra { stroke-width: 3; stroke-linecap: butt; }
+.hero-tema .ht-acento--lleno { stroke-dasharray: none; stroke-width: 3; }
 .hero-tema .ht-trazo { stroke: var(--readout); stroke-width: 1.6; fill: none; stroke-linejoin: round; stroke-linecap: round; opacity: .85; }
 .hero-tema .ht-trazo--punteado { stroke-dasharray: 2 7; stroke-width: 2; }
 .hero-tema .ht-acento { stroke: var(--color-accent); stroke-width: 1.2; stroke-dasharray: 3 5; fill: none; }
@@ -736,6 +739,8 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
 .hero-tema text { font-family: var(--font-semi); font-variant-numeric: tabular-nums; }
 .hero-tema .ht-label { font-size: 17px; fill: var(--color-text-on-dark-muted); }
 .hero-tema .ht-valor { font-size: 19px; font-weight: 500; fill: var(--readout); }
+/* Con gráfica a la derecha, el título se envuelve antes para no montarse sobre ella. */
+@media (min-width: 900px) { .page-hero:has(.hero-tema) h1 { max-width: 11.5ch; } .page-hero:has(.hero-tema) .lead { max-width: 32ch; } }
 @media (max-width: 899px) {
   .hero-tema { width: min(92vw, 520px); right: -18%; top: 14%; transform: none; opacity: .24; }
   .hero-tema text { display: none; }

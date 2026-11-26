@@ -14,7 +14,7 @@ export default function Infraestructura() {
   const items = infraestructura();
   return (
     <>
-      <PageHero title="Infraestructura" lead="Laboratorios, equipamiento e instrumentos desarrollados por el centro." crumbs={[{ label: 'Infraestructura' }]}>
+      <PageHero tema="infraestructura" title="Infraestructura" lead="Laboratorios, equipamiento e instrumentos desarrollados por el centro." crumbs={[{ label: 'Infraestructura' }]}>
         <ul className="anchor-nav">{bloques.map((b) => <li key={b.id}><a href={`#${b.id}`}>{b.titulo}</a></li>)}</ul>
       </PageHero>
       <main id="contenido">

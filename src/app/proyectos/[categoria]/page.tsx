@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import { notFound } from 'next/navigation';
 import PageHero from '@/components/PageHero';
+import { temaDeCategoria } from '@/components/HeroTema';
 import ProjectCard from '@/components/ProjectCard';
 import PubList from '@/components/PubList';
 import Pending from '@/components/Pending';
@@ -28,7 +29,7 @@ export default async function Categoria({ params }: Props) {
     : [{ titulo: 'Proyectos', items: enCategoria }];
   return (
     <>
-      <PageHero tema={c.id === 'atmosfera' ? 'atmosfera' : undefined} title={c.nombre} lead={c.resumen} meta={`Proyectos · ${String(c.orden).padStart(2, '0')}`} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: c.nombre }]} />
+      <PageHero tema={temaDeCategoria(c.id)} title={c.nombre} lead={c.resumen} meta={`Proyectos · ${String(c.orden).padStart(2, '0')}`} crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: c.nombre }]} />
       <main id="contenido">
         <section className="s-light u-hex-dish" style={{ '--dish-x': '90%', '--dish-y': '20%', '--dish-size': '466px' } as CSSProperties}>
           <div className="u-container prose">

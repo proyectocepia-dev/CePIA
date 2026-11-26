@@ -7,7 +7,7 @@ export const metadata = { title: 'Contacto' };
 export default function Contacto() {
   return (
     <>
-      <PageHero title="Contacto" lead="Escríbenos y tu mensaje llegará a la persona que corresponde." crumbs={[{ label: 'Contacto' }]} />
+      <PageHero tema="contacto" title="Contacto" lead="Escríbenos y tu mensaje llegará a la persona que corresponde." crumbs={[{ label: 'Contacto' }]} />
       <main id="contenido">
         <section className="s-light">
           <div className="u-container contact">

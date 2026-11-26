@@ -6,7 +6,7 @@ export const metadata = { title: 'GrTE', description: 'Radiotelescopio de bajo c
 export default function Grte() {
   return (
     <>
-      <PageHero title="GrTE" lead="Radiotelescopio de bajo costo para estudiantes de colegio." meta="Instrumentación y educación" crumbs={[{ label: 'GrTE' }]} />
+      <PageHero tema="grte" title="GrTE" lead="Radiotelescopio de bajo costo para estudiantes de colegio." meta="Instrumentación y educación" crumbs={[{ label: 'GrTE' }]} />
       <main id="contenido">
         <section className="s-night" style={{ paddingTop: 'var(--space-8)' }}>
           <div className="u-container">

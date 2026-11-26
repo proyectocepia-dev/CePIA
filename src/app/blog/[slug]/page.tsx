@@ -21,7 +21,7 @@ export default async function Noticia({ params }: Props) {
   const proyecto = n.proyecto ? proyectoPorId(n.proyecto) : undefined;
   return (
     <>
-      <PageHero title={n.titulo} meta={`${n.etiqueta} · ${fechaCorta(n.fecha)}`} crumbs={[{ label: 'Blog', href: '/blog' }, { label: 'Noticia' }]} />
+      <PageHero tema="blog" title={n.titulo} meta={`${n.etiqueta} · ${fechaCorta(n.fecha)}`} crumbs={[{ label: 'Blog', href: '/blog' }, { label: 'Noticia' }]} />
       <main id="contenido">
         <section className="s-light">
           <article className="u-container prose">
