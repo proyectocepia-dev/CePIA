@@ -790,3 +790,11 @@ html[data-menu="retraido"] .hero .c-nav:not(:focus-within) { opacity: 0; transla
   background: linear-gradient(180deg, rgba(7,12,17,.15) 0%, rgba(7,12,17,.35) 45%, rgba(7,12,17,.94) 100%); }
 .acordeon__panel[data-imagen] :is(.acordeon__tab, .acordeon__body) { z-index: 1; }
 @media (max-width: 720px) { .acordeon__img { display: none; } .acordeon__panel[data-imagen]::after { display: none; } }
+
+/* v1.0 · Imágenes de tarjetas: las ilustraciones tienen el sujeto en el 60 % superior y el resto cae a negro.
+   Se recorta ese vacío para que la imagen llene la tarjeta. */
+.c-project-card__art { aspect-ratio: 4 / 3; overflow: hidden; }
+.c-project-card__art img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; }
+.coverflow--claro .coverflow__card img { object-position: center 10%; }
+.coverflow--claro .coverflow__track { height: clamp(470px, calc(100svh - 360px), 510px); }
+@media (max-width: 720px) { .coverflow--claro .coverflow__track { height: 540px; } }

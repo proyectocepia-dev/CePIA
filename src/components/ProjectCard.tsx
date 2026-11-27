@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Pending from './Pending';
 import { rutaProyecto, type Proyecto } from '@/lib/content';
 
 export default function ProjectCard({ p, i = 0 }: { p: Proyecto; i?: number }) {
@@ -9,7 +8,6 @@ export default function ProjectCard({ p, i = 0 }: { p: Proyecto; i?: number }) {
       <div className={`c-project-card__art ${art}`}>
         {p.imagen ? <img src={p.imagen} alt="" loading="lazy" width={1200} height={1500} /> : <span>{p.sigla}</span>}
       </div>
-      {p.imagenTipo === 'ilustracion' && <span className="project-image-note">Ilustración</span>}
       {p.imagenCredito && <span className="project-image-note">Foto: {p.imagenCredito} · {p.imagenLicencia}</span>}
       <span className="card-top">
         <span className="c-chip c-chip--accent">{p.rol === 'colaboracion' ? 'Colaboración' : p.estado === 'pasado' ? 'Finalizado' : 'Activo'}</span>
@@ -17,7 +15,6 @@ export default function ProjectCard({ p, i = 0 }: { p: Proyecto; i?: number }) {
       </span>
       <h3 className="t-h4">{p.titulo}</h3>
       <p>{p.resumen}</p>
-      {p.editorial === 'por-confirmar' && <Pending />}
     </Link>
   );
 }

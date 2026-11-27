@@ -57,7 +57,6 @@ export default function CategoryCoverflow({ items, tono = 'oscuro', etiqueta = '
                 {c.imagen && <img src={c.imagen} alt="" loading="lazy" draggable={false} width={1200} height={1500} />}
                 <span className="coverflow__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
                 <span className="coverflow__body">
-                  {c.imagenTipo === 'ilustracion' && <span className="coverflow__image-note">Ilustración{c.provisional ? ' · Provisional' : ''}</span>}
                   {c.meta && <span className="c-meta">{c.meta}</span>}
                   <h3>{c.nombre}</h3>
                   <p>{c.resumen}</p>
