@@ -39,12 +39,18 @@ export default function HeroLct() {
     if (!el) return;
     if (!soporta3D()) { setEstado('sin-3d'); return; }
     setMovimiento(!window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    const io = new IntersectionObserver(([e]) => {
-      setVisible(e.isIntersecting);
+    // Carga con margen (el modelo llega antes de que el escenario entre en pantalla)…
+    const carga = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) setEstado((s) => (s === 'esperando' ? 'cargando' : s));
     }, { rootMargin: '160px' });
-    io.observe(el);
-    return () => io.disconnect();
+    // …pero dibuja solo con al menos un 12 % del escenario a la vista. Con margen, el 3D seguía
+    // renderizando cuadro a cuadro debajo de "Proyectos destacados" y trababa sus clics (INP ~650 ms).
+    const dibujo = new IntersectionObserver(([e]) => {
+      setVisible(e.isIntersecting && e.intersectionRatio >= 0.12);
+    }, { threshold: [0, 0.12, 0.3] });
+    carga.observe(el);
+    dibujo.observe(el);
+    return () => { carga.disconnect(); dibujo.disconnect(); };
   }, []);
 
   // Las lecturas llegan ~10 veces por segundo: se escriben directo en el DOM, sin re-render de React.

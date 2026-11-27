@@ -5,6 +5,9 @@ categoria: atmosfera
 resumen: Radiómetros de 22 y 183 GHz para medir el vapor de agua sobre Chajnantor.
 banda: 22 · 183 GHz
 orden: 2
+imagen: /img/proyectos/radiometros.webp
+imagenTipo: ilustracion
+imagenAlt: "Ilustración de un radiómetro genérico en un paisaje de altiplano nocturno."
 ---
 Sobre la superficie de la Tierra existen sitios extremadamente secos, ideales para observar en los rangos milimétrico y submilimétrico. Uno de ellos es el área de Chajnantor, a más de 5.000 m de altura, donde están algunos de los observatorios más importantes del mundo.
 

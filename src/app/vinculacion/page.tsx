@@ -14,7 +14,7 @@ export default function Vinculacion() {
   const items = socios();
   return (
     <>
-      <PageHero title="Vinculación" lead="Con quiénes trabajamos: industria, educación e investigación." crumbs={[{ label: 'Vinculación' }]}>
+      <PageHero tema="vinculacion" title="Vinculación" lead="Con quiénes trabajamos: industria, educación e investigación." crumbs={[{ label: 'Vinculación' }]}>
         <ul className="anchor-nav">{bloques.map((b) => <li key={b.id}><a href={`#${b.id}`}>{b.titulo}</a></li>)}</ul>
       </PageHero>
       <main id="contenido">

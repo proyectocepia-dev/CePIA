@@ -11,13 +11,13 @@ export default function Lct() {
   const notas = noticias().filter((n) => n.proyecto === 'lct');
   return (
     <>
-      <PageHero title={p.titulo} lead={p.resumen} meta="LCT · submilimétrico · 10,4 m" crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: 'LCT' }]} />
+      <PageHero tema="lct" title={p.titulo} lead={p.resumen} meta="LCT · submilimétrico · 10,4 m" crumbs={[{ label: 'Proyectos', href: '/proyectos' }, { label: 'LCT' }]} />
       <main id="contenido">
         <section className="s-night" style={{ paddingTop: 'var(--space-8)' }}>
           <div className="u-container">
             <figure className="c-media-card c-media-card--bleed" style={{ margin: 0, aspectRatio: '21 / 9' }}>
               <span className="c-media-card__label c-eyebrow">Leighton Chajnantor Telescope</span>
-              <img src={p.imagen} alt="Radiotelescopio dentro de su domo abierto bajo un cielo estrellado" />
+              <img src="/img/lct-radiotelescopio.jpg" alt="Radiotelescopio dentro de su domo abierto bajo un cielo estrellado" />
             </figure>
           </div>
         </section>

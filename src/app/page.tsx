@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Logo from '@/components/Logo';
@@ -10,8 +12,11 @@ import LineasAcordeon from '@/components/LineasAcordeon';
 import CategoryCoverflow, { type CoverflowItem } from '@/components/CategoryCoverflow';
 import { categorias, noticias, proyectos, rutaProyecto } from '@/lib/content';
 
-/** Orden del slider de destacados: el LCT queda al centro y GrTE a su derecha. */
-const DESTACADOS = ['eht-titans', 'radiometros', 'lct', 'grte', 'mmics'];
+/** EHT abre los destacados; el LCT mantiene el protagonismo del hero. */
+const DESTACADOS = ['mmics', 'radiometros', 'eht-titans', 'grte', 'lct'];
+
+/** Imagen de cada línea de trabajo: public/img/lineas/<id>.webp. Si aún no existe, el panel queda con su degradado. */
+const imagenLinea = (id: string) => (existsSync(path.join(process.cwd(), 'public', 'img', 'lineas', `${id}.webp`)) ? `/img/lineas/${id}.webp` : undefined);
 
 export default function Inicio() {
   const cats = categorias();
@@ -20,7 +25,7 @@ export default function Inicio() {
   const destacados: CoverflowItem[] = DESTACADOS.flatMap((id) => {
     const p = todos.find((x) => x.id === id);
     if (!p) return [];
-    return [{ id: p.id, href: id === 'grte' ? '/grte' : rutaProyecto(p), nombre: p.titulo, resumen: p.resumen, meta: p.sigla, imagen: p.imagen }];
+    return [{ id: p.id, href: id === 'grte' ? '/grte' : rutaProyecto(p), nombre: p.titulo, resumen: p.resumen, meta: p.sigla, imagen: p.imagen, imagenTipo: p.imagenTipo, provisional: p.editorial === 'por-confirmar' }];
   });
   return (
     <>
@@ -68,7 +73,7 @@ export default function Inicio() {
               <h2 id="lineas" className="t-h2">Líneas de trabajo</h2>
               <Link href="/proyectos">Todos los proyectos</Link>
             </div>
-            <LineasAcordeon items={cats.map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen }))} />
+            <LineasAcordeon items={cats.map((c) => ({ id: c.id, nombre: c.nombre, resumen: c.resumen, imagen: imagenLinea(c.id) }))} />
           </div>
         </section>
 

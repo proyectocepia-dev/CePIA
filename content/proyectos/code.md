@@ -6,5 +6,10 @@ rol: colaboracion
 resumen: Desarrollo de CePIA asociado al sistema de control del CoDE.
 orden: 3
 editorial: por-confirmar
+imagen: /img/proyectos/code.webp
+imagenTipo: ilustracion
+imagenAlt: "Ilustración de un módulo electrónico de control con circuitos y conectores."
 ---
-CoDE no es un proyecto de CePIA: el centro hizo un desarrollo asociado a su sistema de control. Texto por completar con la información del centro.
+CePIA participó en un desarrollo asociado al sistema de control del CoDE. Esta contribución se presenta dentro de la línea de colaboraciones del centro.
+
+CoDE es un proyecto externo; la participación de CePIA corresponde al desarrollo vinculado a su sistema de control.

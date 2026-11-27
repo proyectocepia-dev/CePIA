@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useCallback, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
 
-export type CoverflowItem = { id: string; href: string; nombre: string; resumen: string; meta?: string; imagen?: string };
+export type CoverflowItem = { id: string; href: string; nombre: string; resumen: string; meta?: string; imagen?: string; imagenTipo?: 'ilustracion' | 'fotografia'; provisional?: boolean };
 
 type Props = { items: CoverflowItem[]; tono?: 'oscuro' | 'claro'; etiqueta?: string; cta?: string };
 
@@ -54,7 +54,7 @@ export default function CategoryCoverflow({ items, tono = 'oscuro', etiqueta = '
                 className={`coverflow__card ${ARTE[i % ARTE.length]}`}
                 onClick={(e) => { if (!centro) { e.preventDefault(); ir(i); } }}
               >
-                {c.imagen && <img src={c.imagen} alt="" loading="lazy" draggable={false} />}
+                {c.imagen && <img src={c.imagen} alt="" loading="lazy" draggable={false} width={1200} height={1500} />}
                 <span className="coverflow__num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
                 <span className="coverflow__body">
                   {c.meta && <span className="c-meta">{c.meta}</span>}
